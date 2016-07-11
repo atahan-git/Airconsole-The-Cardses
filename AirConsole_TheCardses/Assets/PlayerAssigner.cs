@@ -15,6 +15,7 @@ public class PlayerAssigner : MonoBehaviour {
 
 	void Awake () {
 		//AirConsole.instance.onMessage += OnMessage;
+		uiText.text = "NEED MORE PLAYERS";
 		AirConsole.instance.onConnect += OnConnect;
 		AirConsole.instance.onDisconnect += OnDisconnect;
 	}
@@ -87,7 +88,8 @@ public class PlayerAssigner : MonoBehaviour {
 
 	public void UpdateScoreUI () {
 		// update text canvas
-		uiText.text = scorePlayerBlue + ":" + scorePlayerRed;
+		//uiText.text = scorePlayerBlue + ":" + scorePlayerRed;
+		uiText.text = "";
 	}
 
 	void FixedUpdate () {

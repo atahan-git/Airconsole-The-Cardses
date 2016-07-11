@@ -5,19 +5,22 @@ using Newtonsoft.Json.Linq;
 
 public class PlayerScript : MonoBehaviour {
 
+	//public PowerUpDealer.PowerUpTypes curPowerUp = PowerUpDealer.PowerUpTypes.noUp;
+
 	public int id = 0;
 	public Vector3 playerPos;
 
-	int maxGrid = 3;
-
 	public CardGenerator cardGen;
 	public PlayerAssigner master;
+	public PowerUpDealer powerUp;
 
 	public float speed = 20f;
 	float CheckSpeed = 0.3f;
 
-	CardScript[] rotatedCards = new CardScript[2];
+	[HideInInspector]
+	public CardScript[] rotatedCards = new CardScript[2];
 
+	public bool ShouldMove = true;
 
 	// Use this for initialization
 	void Start () {
@@ -28,6 +31,38 @@ public class PlayerScript : MonoBehaviour {
 	void Update () {
 
 		transform.position = Vector3.Lerp(transform.position, cardGen.grid[(int)playerPos.x, (int)playerPos.y], speed * Time.deltaTime);
+		#if UNITY_EDITOR
+		if(!ShouldMove)
+			return;
+		if(id == 0 ){
+			if(Input.GetKeyDown(KeyCode.W))
+				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
+			if(Input.GetKeyDown(KeyCode.S))
+				playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
+			if(Input.GetKeyDown(KeyCode.D))
+				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
+			if(Input.GetKeyDown(KeyCode.A))
+				playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
+			if(Input.GetKeyDown(KeyCode.Space))
+				PressSelect();
+
+
+
+		}else{
+			if(Input.GetKeyDown(KeyCode.UpArrow))
+				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
+			if(Input.GetKeyDown(KeyCode.DownArrow))
+				playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
+			if(Input.GetKeyDown(KeyCode.RightArrow))
+				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
+			if(Input.GetKeyDown(KeyCode.LeftArrow))
+				playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
+			if(Input.GetKeyDown(KeyCode.RightShift))
+				PressSelect();
+		}
+
+		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
+		#endif
 	
 	}
 
@@ -38,72 +73,86 @@ public class PlayerScript : MonoBehaviour {
 				//print ("got something4");
 				print (data);
 				if (data ["dpad-left"] != null) {
-					if ((bool)data ["dpad-left"] ["pressed"]) {
-						//print ("got something5");
+					
+					if(!ShouldMove)
+						return;
+					Move (data);
 
-						switch ((string)data ["dpad-left"] ["message"] ["direction"]) {
-						case "right":
-							playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
-							break;
-						case "left":
-							playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
-							break;
-						case "up":
-							playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
-							break;
-						case "down":
-							playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
-							break;
-						default:
-							print ("error");
-							break;
-						}
-
-					}
-					playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, maxGrid), (int)Mathf.Clamp (playerPos.y, 0, maxGrid), 0);
 				} else if (data ["Select"] != null) {
 					if ((bool)data ["Select"] ["pressed"]) {
 
-						CardScript myCardS = cardGen.Cards [(int)playerPos.x, (int)playerPos.y].GetComponent<CardScript> ();
-
-						if (myCardS.cardType == 8)
-							return;
-						if (myCardS.isSelected)
-							return;
-
-						myCardS.RotateSelf ();
-
-						if (rotatedCards [0] == null) {
-							rotatedCards [0] = myCardS;
-							myCardS.isSelected = true;
-						} else {
-							rotatedCards [1] = myCardS;
-							myCardS.isSelected = true;
-							Invoke ("CheckCards", CheckSpeed);
-						}
+						PressSelect ();
 					}
+				} else if (data ["swipepattern-right"] != null) {
+					powerUp.UsePowerUp (data);
 				}
 			}
+		}
+	}
+
+	void Move(JToken data){
+		
+		if ((bool)data ["dpad-left"] ["pressed"]) {
+			//print ("got something5");
+
+			switch ((string)data ["dpad-left"] ["message"] ["direction"]) {
+			case "right":
+				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
+				break;
+			case "left":
+				playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
+				break;
+			case "up":
+				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
+				break;
+			case "down":
+				playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
+				break;
+			default:
+				print ("error");
+				break;
+			}
+
+		}
+		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+	}
+
+	void PressSelect(){
+
+		CardScript myCardS = cardGen.allCards [(int)playerPos.x, (int)playerPos.y].GetComponent<CardScript> ();
+
+		if (myCardS.cardType == 0)
+			return;
+		if (myCardS.isSelected)
+			return;
+
+		myCardS.RotateSelf ();
+
+		if (rotatedCards [0] == null) {
+			rotatedCards [0] = myCardS;
+			myCardS.isSelected = true;
+		} else {
+			rotatedCards [1] = myCardS;
+			myCardS.isSelected = true;
+			Invoke ("CheckCards", CheckSpeed);
 		}
 	}
 
 	void CheckCards(){
 		//got them correct
 		if (rotatedCards [0].cardType == rotatedCards [1].cardType) {
-			
-			rotatedCards [0].cardType = 8;	
-			rotatedCards [0].SetColor ();
+			int myCardType = rotatedCards [0].cardType;
+
+			rotatedCards [0].cardType = 0;	
+			//rotatedCards [0].SetColor ();
+			rotatedCards [0].isSelected = false;
 			rotatedCards [0] = null;
-			rotatedCards [1].cardType = 8;
-			rotatedCards [1].SetColor ();
+			rotatedCards [1].cardType = 0;
+			//rotatedCards [1].SetColor ();
+			rotatedCards [1].isSelected = false;
 			rotatedCards [1] = null;
 
-			if (id == 0) {
-				master.scorePlayerBlue ++;
-			} else {
-				master.scorePlayerRed ++;
-			}
-			master.UpdateScoreUI ();
+			ScoreKeeper.s.AddScore(id, myCardType, 1);
 
 		} else {
 			rotatedCards [0].RotateSelf ();
@@ -114,6 +163,7 @@ public class PlayerScript : MonoBehaviour {
 			rotatedCards [1] = null;
 		}
 	}
+		
 
 	Vector3 AddVectors(Vector3 vec1, Vector3 vec2){
 		return new Vector3 (vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z);

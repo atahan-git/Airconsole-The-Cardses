@@ -4,8 +4,9 @@ using System.Collections;
 public class CardGenerator : MonoBehaviour {
 
 	public Vector3[,] grid = new Vector3[4,4];
-	public GameObject[,] Cards = new GameObject[4,4];
-	int gridSize = 4;
+	public GameObject[,] allCards = new GameObject[4,4];
+	public int gridSizeX = 4;
+	public int gridSizeY = 4;
 
 	public float gridScaleX = 1.5f;
 	public float gridScaleY = 2f;
@@ -15,37 +16,58 @@ public class CardGenerator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		transform.position = new Vector3 (transform.position.x - gridScaleX * 1.5f, transform.position.y - gridScaleY * 1.5f, transform.position.z);
+		SetUpGrid ();
+	}
+	
+	// Update is called once per frame
+	void Update () {
+	
+	}
 
-		for (int i = 0; i < gridSize; i++) {
-			for (int m = 0; m < gridSize; m++) {
+	void SetUpGrid (){
+
+		//first clean old cards if they exist
+		DeleteCards ();
+
+		//give us a better centered position
+		transform.position = new Vector3 (transform.position.x - gridScaleX * (gridSizeX/2 - 0.5f), transform.position.y - gridScaleY * (gridSizeY/2 - 0.5f), transform.position.z);
+
+		//set up arrays according to the sizes that are given to us
+		grid = new Vector3[gridSizeX,gridSizeY];
+		allCards = new GameObject[gridSizeX,gridSizeY];
+
+		//set up grid positions
+		for (int i = 0; i < gridSizeX; i++) {
+			for (int m = 0; m < gridSizeY; m++) {
 
 				grid [i, m] = new Vector3();
 				grid [i, m] = transform.position + new Vector3 (i * gridScaleX, m * gridScaleY, 0);
 
 			}
 		}
+			
+		//instantiate cards at correct positions
+		for (int i = 0; i < gridSizeX; i++) {
+			for (int m = 0; m < gridSizeY; m++) {
 
-		int[] cardCodes = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
-		RandomizeArray (cardCodes);
-
-		int n = 0;
-		for (int i = 0; i < gridSize; i++) {
-			for (int m = 0; m < gridSize; m++) {
-				
 				GameObject myCard = (GameObject)Instantiate (card, grid [i, m], Quaternion.identity);
-				Cards [i, m] = myCard;
-				myCard.GetComponent<CardScript> ().cardType = cardCodes [n];
-				myCard.GetComponent<CardScript> ().SetColor ();
-				n++;
+				allCards [i, m] = myCard;
 
 			}
 		}
+
+
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+
+	void DeleteCards (){
+		for (int i = 0; i < allCards.GetLength(0); i++) {
+			for (int m = 0; m < allCards.GetLength(1); m++) {
+				if (allCards[i,m] != null) {
+					Destroy (allCards [i, m].gameObject);
+					allCards [i, m] = null;
+				}
+			}
+		}
 	}
 
 	void RandomizeArray(int[] arr){
