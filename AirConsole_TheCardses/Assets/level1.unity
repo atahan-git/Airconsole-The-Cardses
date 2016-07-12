@@ -3943,7 +3943,8 @@ MonoBehaviour:
   cardGen: {fileID: 988072160}
   master: {fileID: 1292795393}
   powerUp: {fileID: 764481664}
-  speed: 20
+  animSpeed: 20
+  moveSpeed: 0.5
   rotatedCards:
   - {fileID: 0}
   - {fileID: 0}
@@ -4878,7 +4879,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &909817637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4895,7 +4896,8 @@ MonoBehaviour:
   cardGen: {fileID: 988072160}
   master: {fileID: 1292795393}
   powerUp: {fileID: 909817639}
-  speed: 20
+  animSpeed: 20
+  moveSpeed: 0.5
   rotatedCards:
   - {fileID: 0}
   - {fileID: 0}

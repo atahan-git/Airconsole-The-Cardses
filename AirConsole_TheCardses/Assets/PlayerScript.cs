@@ -14,7 +14,8 @@ public class PlayerScript : MonoBehaviour {
 	public PlayerAssigner master;
 	public PowerUpDealer powerUp;
 
-	public float speed = 20f;
+	public float animSpeed = 20f;
+	public float moveSpeed = 0.5f;//lower the better
 	float CheckSpeed = 0.3f;
 
 	[HideInInspector]
@@ -30,7 +31,7 @@ public class PlayerScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		transform.position = Vector3.Lerp(transform.position, cardGen.grid[(int)playerPos.x, (int)playerPos.y], speed * Time.deltaTime);
+		transform.position = Vector3.Lerp(transform.position, cardGen.grid[(int)playerPos.x, (int)playerPos.y], animSpeed * Time.deltaTime);
 		#if UNITY_EDITOR
 		if(!ShouldMove)
 			return;
@@ -67,12 +68,13 @@ public class PlayerScript : MonoBehaviour {
 	}
 
 	void OnMessage (int device_id, JToken data) {
+		//print (data);
 		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
-		if (active_player != -1) {
-			if (active_player == id) {
+		if (true/*active_player != -1*/) {
+			if (true/*active_player == id*/) {
 				//print ("got something4");
-				print (data);
-				if (data ["dpad-left"] != null) {
+				//print (data);
+				if (data ["dpadrelative-left "] != null) {
 					
 					if(!ShouldMove)
 						return;
@@ -91,30 +93,48 @@ public class PlayerScript : MonoBehaviour {
 	}
 
 	void Move(JToken data){
-		
-		if ((bool)data ["dpad-left"] ["pressed"]) {
+		//start moving
+		if ((bool)data ["dpadrelative-left"] ["pressed"]) {
 			//print ("got something5");
 
-			switch ((string)data ["dpad-left"] ["message"] ["direction"]) {
+			switch ((string)data ["dpadrelative-left"] ["message"] ["direction"]) {
 			case "right":
-				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
+				print ("Right");
+				StartCoroutine (MoveStep (new Vector3 (1, 0, 0), moveSpeed));
 				break;
 			case "left":
-				playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
+				print ("Left");
+				StartCoroutine (MoveStep (new Vector3 (-1, 0, 0), moveSpeed));
 				break;
 			case "up":
-				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
+				print ("Up");
+				StartCoroutine (MoveStep (new Vector3 (0, 1, 0), moveSpeed));
 				break;
 			case "down":
-				playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
+				print ("Down");
+				StartCoroutine (MoveStep (new Vector3 (0, -1, 0), moveSpeed));
 				break;
 			default:
 				print ("error");
 				break;
 			}
 
+			// stop moving
+		} else {
+			print ("stopped moving");
+			StopCoroutine ("MoveStep");
 		}
-		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+
+	}
+
+	IEnumerator MoveStep(Vector3 moveAm, float repeatRate) {
+		print ("started to move");
+		while(true) {
+			playerPos = AddVectors (playerPos, moveAm);
+			playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+
+			yield return new WaitForSeconds(repeatRate);
+		}
 	}
 
 	void PressSelect(){
@@ -168,4 +188,33 @@ public class PlayerScript : MonoBehaviour {
 	Vector3 AddVectors(Vector3 vec1, Vector3 vec2){
 		return new Vector3 (vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z);
 	}
+
+
+	//old move script
+	/*void Move(JToken data){
+		
+		if ((bool)data ["dpad-left"] ["pressed"]) {
+			//print ("got something5");
+
+			switch ((string)data ["dpad-left"] ["message"] ["direction"]) {
+			case "right":
+				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
+				break;
+			case "left":
+				playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
+				break;
+			case "up":
+				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
+				break;
+			case "down":
+				playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
+				break;
+			default:
+				print ("error");
+				break;
+			}
+
+		}
+		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+	}*/
 }
