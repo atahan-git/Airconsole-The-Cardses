@@ -154,7 +154,8 @@ public class PowerUpDealer : MonoBehaviour {
 
 	void undoLightPowerUp(){
 		isLightActive = false;
-		Destroy (myLightEffect.gameObject);
+		if (myLightEffect != null)
+			Destroy (myLightEffect.gameObject);
 		myLightEffect = null;
 	}
 	//--------------------------------------------------------------------
@@ -163,13 +164,17 @@ public class PowerUpDealer : MonoBehaviour {
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [14] > 0) {
 			ScoreKeeper.s.AddScore(myPlayer.id, 14, -1);
 			isShadowActive = true;
+			myShadowEffect = (GameObject)Instantiate (PowerUpStuff.s.ShadowEffect, transform.position, transform.rotation);
+			myShadowEffect.transform.parent = transform;
+			Invoke ("undoLightPowerUp", PowerUpStuff.s.shadowTime);
 		}
 	}
 
 	void undoShadowPowerUp(){
-		isLightActive = false;
-		Destroy (myLightEffect.gameObject);
-		myLightEffect = null;
+		isShadowActive = false;
+		if (myShadowEffect != null)
+			Destroy (myShadowEffect.gameObject);
+		myShadowEffect = null;
 	}
 	//--------------------------------------------------------------------
 	void FirePowerUp(){ // 9
@@ -221,7 +226,7 @@ public class PowerUpDealer : MonoBehaviour {
 			}
 		}
 
-		yield return new WaitForSeconds (0.2f);
+		yield return new WaitForSeconds (0.3f);
 
 		//check Cards
 		for (int l = 0; l < 11; l++) {
