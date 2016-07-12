@@ -20,8 +20,11 @@ public class PlayerScript : MonoBehaviour {
 
 	[HideInInspector]
 	public CardScript[] rotatedCards = new CardScript[2];
+	GameObject[] playerEffectMem = new GameObject[2];
 
-	public bool ShouldMove = true;
+	public bool canMove = true;
+
+	public GameObject playerEffect;
 
 	// Use this for initialization
 	void Start () {
@@ -33,7 +36,7 @@ public class PlayerScript : MonoBehaviour {
 
 		transform.position = Vector3.Lerp(transform.position, cardGen.grid[(int)playerPos.x, (int)playerPos.y], animSpeed * Time.deltaTime);
 		#if UNITY_EDITOR
-		if(!ShouldMove)
+		if(!canMove)
 			return;
 		if(id == 0 ){
 			if(Input.GetKeyDown(KeyCode.W))
@@ -70,13 +73,13 @@ public class PlayerScript : MonoBehaviour {
 	void OnMessage (int device_id, JToken data) {
 		//print (data);
 		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
-		if (true/*active_player != -1*/) {
-			if (true/*active_player == id*/) {
+		if (active_player != -1) {
+			if (active_player == id) {
 				//print ("got something4");
 				//print (data);
 				if (data ["dpadrelative-left "] != null) {
 					
-					if(!ShouldMove)
+					if(!canMove)
 						return;
 					Move (data);
 
@@ -147,28 +150,58 @@ public class PlayerScript : MonoBehaviour {
 			return;
 
 		myCardS.RotateSelf ();
+		myCardS.isSelected = true;
+		GameObject temp = (GameObject)Instantiate (playerEffect, myCardS.transform.position, myCardS.transform.rotation);
+		if (playerEffectMem [0] == null) {
+			playerEffectMem [0] = temp;
+		} else {
+			playerEffectMem [1] = temp;
+		}
+		if (powerUp.isEarthActive) {
+			powerUp.EarthPlace ();
+		}
 
 		if (rotatedCards [0] == null) {
 			rotatedCards [0] = myCardS;
-			myCardS.isSelected = true;
+			if (powerUp.isEarthActive) {
+				powerUp.Invoke("EarthPreCheck", CheckSpeed);
+			}
 		} else {
 			rotatedCards [1] = myCardS;
-			myCardS.isSelected = true;
 			Invoke ("CheckCards", CheckSpeed);
 		}
 	}
 
 	void CheckCards(){
+
+		foreach (GameObject gam in playerEffectMem) {
+			if (gam != null)
+				Destroy (gam.gameObject);
+		}
+
+		if (powerUp.isShadowActive) {
+			powerUp.ShadowCheck(rotatedCards);
+			return;
+		}
+
+		if (powerUp.isPoisonActive) {
+			powerUp.PoisonCheck(rotatedCards);
+			return;
+		}
+
+		if (powerUp.isEarthActive) {
+			powerUp.EarthCheck();
+			return;
+		}
+
 		//got them correct
 		if (rotatedCards [0].cardType == rotatedCards [1].cardType) {
 			int myCardType = rotatedCards [0].cardType;
 
 			rotatedCards [0].cardType = 0;	
-			//rotatedCards [0].SetColor ();
 			rotatedCards [0].isSelected = false;
 			rotatedCards [0] = null;
 			rotatedCards [1].cardType = 0;
-			//rotatedCards [1].SetColor ();
 			rotatedCards [1].isSelected = false;
 			rotatedCards [1] = null;
 

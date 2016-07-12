@@ -9,12 +9,17 @@ public class PowerUpStuff : MonoBehaviour {
 	public GameObject LightEffect;
 	public float shadowTime = 10f;
 	public GameObject ShadowEffect;
+	public float shadowMultiplier = 2f;
 	public float poisonTime = 10f;
 	public GameObject PoisonEffect;
 	public float iceTime = 5f;
 	public GameObject IceEffect;
+	public float earthTime = 5f;
+	public GameObject EarthEffect;
+	public GameObject EarthSelectEffect;
 
 	public GameObject FireEffect;
+	public GameObject NetherEffect;
 
 	// Use this for initialization
 	void Awake () {

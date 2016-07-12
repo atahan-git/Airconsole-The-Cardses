@@ -274,7 +274,7 @@ MonoBehaviour:
   state: 0
   rotSpeed: 20
   ReSelectTime: 5
-  dragonChance: 7
+  dragonChance: 6
   isSelected: 0
   getEffect: {fileID: 143876, guid: b9212b2297277784cbd7592b401eb9e4, type: 2}
 --- !u!212 &21254408

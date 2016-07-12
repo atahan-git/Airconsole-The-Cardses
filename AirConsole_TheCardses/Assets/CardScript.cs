@@ -39,6 +39,8 @@ public class CardScript : MonoBehaviour {
 
 	public float rotSpeed = 20f;
 	public float ReSelectTime = 5f;
+	[HideInInspector]
+	public float _ReSelectTime = 5f;
 	public int dragonChance = 7;
 
 	public bool isSelected = false;
@@ -49,6 +51,7 @@ public class CardScript : MonoBehaviour {
 
 		transform.rotation = Quaternion.Euler(0, 180, 0);
 		SelectRandomCardType ();
+		_ReSelectTime = ReSelectTime;
 
 	}
 	
@@ -66,8 +69,8 @@ public class CardScript : MonoBehaviour {
 		sRend.sprite = sprites[cardType];
 		if (cardType == 0) {
 			//print ("invoke pls");
-			Invoke ("RotateSelf", ReSelectTime - 0.5f);
-			Invoke ("SelectRandomCardType", ReSelectTime);
+			Invoke ("RotateSelf", _ReSelectTime - 0.5f);
+			Invoke ("SelectRandomCardType", _ReSelectTime);
 		}
 	}
 
@@ -86,6 +89,8 @@ public class CardScript : MonoBehaviour {
 			cardType = Random.Range(1,7 + 1);
 
 		}
+
+		_ReSelectTime = ReSelectTime;
 
 		//print ("card selected = " + cardType);
 	}

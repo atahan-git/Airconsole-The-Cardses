@@ -881,11 +881,16 @@ MonoBehaviour:
   LightEffect: {fileID: 126538, guid: f162faa41931c6245812129e12f574b5, type: 2}
   shadowTime: 10
   ShadowEffect: {fileID: 123844, guid: e27571e759660324b98add77eb6b9287, type: 2}
+  shadowMultiplier: 4
   poisonTime: 10
   PoisonEffect: {fileID: 106310, guid: 0d151beff6f722f4fbd4fda3d6493b80, type: 2}
   iceTime: 5
   IceEffect: {fileID: 114782, guid: d7b1e4bf378754a41a5c6ecf925c6f2e, type: 2}
+  earthTime: 5
+  EarthEffect: {fileID: 121692, guid: 677a0cd884bb0ed4bb3f3946ea77fc3e, type: 2}
+  EarthSelectEffect: {fileID: 114392, guid: 33f5333e95960cb48891a0f84778582d, type: 2}
   FireEffect: {fileID: 157526, guid: 795736b42963a0741b3d56004f1e49bd, type: 2}
+  NetherEffect: {fileID: 125818, guid: 4752c1d5471fa6347989698e00e9e499, type: 2}
 --- !u!1 &280860414
 GameObject:
   m_ObjectHideFlags: 0
@@ -3212,69 +3217,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 558293785}
---- !u!1001 &575596986
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: -3.941
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 430398, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_RootOrder
-      value: 13
-      objectReference: {fileID: 0}
-    - target: {fileID: 21254408, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: f1825e88f9601b04184f04c5aff0dc28,
-        type: 3}
-    - target: {fileID: 21254408, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_Color.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 21254408, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_Color.g
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 21254408, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_Color.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 163096, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
-  m_IsPrefabParent: 0
 --- !u!1 &606736087
 GameObject:
   m_ObjectHideFlags: 0
@@ -3948,7 +3890,8 @@ MonoBehaviour:
   rotatedCards:
   - {fileID: 0}
   - {fileID: 0}
-  ShouldMove: 1
+  canMove: 1
+  playerEffect: {fileID: 146378, guid: 4cdb1d671527161438d36ffa28f1cf4e, type: 2}
 --- !u!4 &764481663
 Transform:
   m_ObjectHideFlags: 0
@@ -3984,8 +3927,7 @@ MonoBehaviour:
   isLightActive: 0
   isShadowActive: 0
   isEarthActive: 0
-  isPoisonActive: 0
-  isIceActive: 0
+  poisonId: -1
 --- !u!1 &781066595
 GameObject:
   m_ObjectHideFlags: 0
@@ -4879,7 +4821,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &909817637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4901,7 +4843,8 @@ MonoBehaviour:
   rotatedCards:
   - {fileID: 0}
   - {fileID: 0}
-  ShouldMove: 1
+  canMove: 1
+  playerEffect: {fileID: 159882, guid: 6caba5279032d3c49917c7143004e382, type: 2}
 --- !u!4 &909817638
 Transform:
   m_ObjectHideFlags: 0
@@ -4937,8 +4880,7 @@ MonoBehaviour:
   isLightActive: 0
   isShadowActive: 0
   isEarthActive: 0
-  isPoisonActive: 0
-  isIceActive: 0
+  poisonId: -1
 --- !u!1 &912483460
 GameObject:
   m_ObjectHideFlags: 0
@@ -5184,10 +5126,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 192f1582de6bd354882a1462b91d970e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSizeX: 10
+  gridSizeX: 12
   gridSizeY: 4
-  gridScaleX: 1.5
-  gridScaleY: 2
+  gridScaleX: 1.4
+  gridScaleY: 1.9
   card: {fileID: 163096, guid: 9078591e8cbd8164cb29471d98ff3b35, type: 2}
 --- !u!4 &988072161
 Transform:

@@ -9,7 +9,7 @@ public class PowerUpDealer : MonoBehaviour {
 	public PlayerScript myPlayer;
 	public PowerUpDealer[] otherPlayers;
 
-	public enum PowerUpTypes
+	/*public enum PowerUpTypes
 	{
 		noUp,
 		light,
@@ -19,7 +19,7 @@ public class PowerUpDealer : MonoBehaviour {
 		poison,
 		nether,
 		ice
-	}
+	}*/
 
 	public int[] DataTester = new int[5];
 
@@ -31,16 +31,45 @@ public class PowerUpDealer : MonoBehaviour {
 	NestedIntArray[] netherCodes = new NestedIntArray[2];
 	NestedIntArray[] iceCodes = new NestedIntArray[2];
 
+	//--------------------------------------------------------------------------
+
 	public bool isLightActive = false;
 	public bool isShadowActive = false;
 	public bool isEarthActive = false;
-	public bool isPoisonActive = false;
-	public bool isIceActive = false;
 
+	public int poisonId = -1;
+	bool _isPoisonActive = false;
+	public bool isPoisonActive{
+		set{
+			if (value) {
+				EnablePoison ();
+			} 
+			_isPoisonActive = value;
+		}
+		get{
+			return _isPoisonActive;
+		}
+	}
+
+	bool _isIceActive = false;
+	public bool isIceActive{
+		set{
+			if (value) {
+				EnableIce ();
+			} 
+			_isIceActive = value;
+		}
+		get{
+			return _isIceActive;
+		}
+	}
+
+	//--------------------------------------------------------------------------
 	private GameObject myLightEffect;
 	private GameObject myShadowEffect;
-	private GameObject[] myPosionEffects;
-	private GameObject[] myIceEffects;
+	private GameObject myPosionEffect;
+	private GameObject myIceEffect;
+	private GameObject myEarthEffect;
 
 	void Start(){
 		lightCodes = PowerUpCodes.s.lightCodes;
@@ -50,12 +79,11 @@ public class PowerUpDealer : MonoBehaviour {
 		poisonCodes = PowerUpCodes.s.poisonCodes;
 		netherCodes = PowerUpCodes.s.netherCodes;
 		iceCodes = PowerUpCodes.s.iceCodes;
-
-
 	}
 
 	void Update(){
 		#if UNITY_EDITOR
+		if(myPlayer.id == 0){
 		if (Input.GetKeyDown (KeyCode.L)) {
 			LightPowerUp ();
 		}
@@ -77,10 +105,13 @@ public class PowerUpDealer : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.I)) {
 			IcePowerUp ();
 		}
+		}
 		#endif
 	}
 
-	//---------------------------------------------------------------------------- main function
+
+
+	//------------------------------------------------------------------------------------------------------------------ main function
 	public void UsePowerUp(JToken data){
 
 		/*if (myPlayer.curPowerUp != PowerUpTypes.noUp)
@@ -91,7 +122,10 @@ public class PowerUpDealer : MonoBehaviour {
 		ActivatePowerUp (mydata);
 		//print (mydata);
 	}
-	//---------------------------------------------------------------------------- data parser
+
+
+
+	//------------------------------------------------------------------------------------------------------------------ data parser
 	int[] ParseData(JToken data){
 
 		var check = data ["swipepattern-right"] ["message"].Children();
@@ -115,7 +149,10 @@ public class PowerUpDealer : MonoBehaviour {
 
 		return mydata;
 	}
-	//---------------------------------------------------------------------------- type finder
+
+
+
+	//------------------------------------------------------------------------------------------------------------------ type finder
 	void ActivatePowerUp(int[] parsedData){
 
 		if (compArrNAr (parsedData, lightCodes)) {
@@ -137,7 +174,11 @@ public class PowerUpDealer : MonoBehaviour {
 		}
 			
 	}
-	//---------------------------------------------------------------------------- power up functions
+
+
+
+	//------------------------------------------------------------------------------------------------------------------ power up functions
+	//---------------------------------------------------------------------------------------------Done
 	void LightPowerUp(){ // 11
 		print ("LightPowerUp");
 		//do we have dragon?
@@ -149,6 +190,8 @@ public class PowerUpDealer : MonoBehaviour {
 			myLightEffect = (GameObject)Instantiate (PowerUpStuff.s.LightEffect, transform.position, transform.rotation);
 			myLightEffect.transform.parent = transform;
 			Invoke ("undoLightPowerUp", PowerUpStuff.s.lightTime);
+			DisableIce ();
+			DisablePoison ();
 		}
 	}
 
@@ -158,7 +201,9 @@ public class PowerUpDealer : MonoBehaviour {
 			Destroy (myLightEffect.gameObject);
 		myLightEffect = null;
 	}
-	//--------------------------------------------------------------------
+
+
+	//---------------------------------------------------------------------------------------------Done
 	void ShadowPowerUp(){ // 14
 		print ("ShadowPowerUp");
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [14] > 0) {
@@ -166,7 +211,7 @@ public class PowerUpDealer : MonoBehaviour {
 			isShadowActive = true;
 			myShadowEffect = (GameObject)Instantiate (PowerUpStuff.s.ShadowEffect, transform.position, transform.rotation);
 			myShadowEffect.transform.parent = transform;
-			Invoke ("undoLightPowerUp", PowerUpStuff.s.shadowTime);
+			Invoke ("undoShadowPowerUp", PowerUpStuff.s.shadowTime);
 		}
 	}
 
@@ -176,12 +221,42 @@ public class PowerUpDealer : MonoBehaviour {
 			Destroy (myShadowEffect.gameObject);
 		myShadowEffect = null;
 	}
-	//--------------------------------------------------------------------
+
+
+	public void ShadowCheck(CardScript[] rotatedCards){
+		
+		//got them correct
+		if (rotatedCards [0].cardType == rotatedCards [1].cardType) {
+			int myCardType = rotatedCards [0].cardType;
+
+			rotatedCards [0]._ReSelectTime = rotatedCards [0].ReSelectTime * PowerUpStuff.s.shadowMultiplier;
+			rotatedCards [0].cardType = 0;	
+			rotatedCards [0].isSelected = false;
+			rotatedCards [0] = null;
+			rotatedCards [1]._ReSelectTime = rotatedCards [1].ReSelectTime * PowerUpStuff.s.shadowMultiplier;
+			rotatedCards [1].cardType = 0;
+			rotatedCards [1].isSelected = false;
+			rotatedCards [1] = null;
+
+			ScoreKeeper.s.AddScore(myPlayer.id, myCardType, 1);
+
+		} else {
+			rotatedCards [0].RotateSelf ();
+			rotatedCards [0].isSelected = false;
+			rotatedCards [0] = null;
+			rotatedCards [1].RotateSelf ();
+			rotatedCards [1].isSelected = false;
+			rotatedCards [1] = null;
+		}
+	}
+
+
+	//---------------------------------------------------------------------------------------------Done
 	void FirePowerUp(){ // 9
 		print ("FirePowerUp");
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [9] > 0) {
 			ScoreKeeper.s.AddScore(myPlayer.id, 9, -1);
-			StartCoroutine("FireActivate");
+			StartCoroutine(FireActivate());
 		}
 	}
 
@@ -191,11 +266,13 @@ public class PowerUpDealer : MonoBehaviour {
 		Instantiate(PowerUpStuff.s.FireEffect, transform.position, transform.rotation);
 		//
 
+		Vector3 playerPos = myPlayer.playerPos;
+
 		//get cards
-		int leftLimit  = (int)Mathf.Clamp (myPlayer.playerPos.x - 1, 0, myPlayer.cardGen.gridSizeX - 1);
-		int rightLimit = (int)Mathf.Clamp (myPlayer.playerPos.x + 1, 0, myPlayer.cardGen.gridSizeX - 1);
-		int downLimit  = (int)Mathf.Clamp (myPlayer.playerPos.y - 1, 0, myPlayer.cardGen.gridSizeX - 1);
-		int upLimit    = (int)Mathf.Clamp (myPlayer.playerPos.y + 1, 0, myPlayer.cardGen.gridSizeX - 1);
+		int leftLimit  = (int)Mathf.Clamp (playerPos.x - 1, 0, myPlayer.cardGen.gridSizeX - 1);
+		int rightLimit = (int)Mathf.Clamp (playerPos.x + 1, 0, myPlayer.cardGen.gridSizeX - 1);
+		int downLimit  = (int)Mathf.Clamp (playerPos.y - 1, 0, myPlayer.cardGen.gridSizeY - 1);
+		int upLimit    = (int)Mathf.Clamp (playerPos.y + 1, 0, myPlayer.cardGen.gridSizeY - 1);
 
 		CardScript[] cardsToCheck = new CardScript[11];
 		/*for (int i = 0; i < 11; i++) {
@@ -229,17 +306,300 @@ public class PowerUpDealer : MonoBehaviour {
 		yield return new WaitForSeconds (0.3f);
 
 		//check Cards
-		for (int l = 0; l < 11; l++) {
+		StartCoroutine (CheckCards (cardsToCheck));
+	}
+
+
+	//--------------------------------------------------------------------
+	CardScript[] earthMem = new CardScript[4];
+	GameObject[] earthEfMem = new GameObject[2];
+
+	void EarthPowerUp(){ // 8
+		print ("EarthPowerUp");
+		if (ScoreKeeper.s.players [myPlayer.id].Scores [8] > 0) {
+			ScoreKeeper.s.AddScore(myPlayer.id, 8, -1);
+			isEarthActive = true;
+			myEarthEffect = (GameObject)Instantiate (PowerUpStuff.s.EarthEffect, transform.position, transform.rotation);
+			myEarthEffect.transform.parent = transform;
+			Invoke ("undoEarthPowerUp", PowerUpStuff.s.earthTime);
+		}
+	}
+
+	void undoEarthPowerUp(){
+		isEarthActive = false;
+		if (myEarthEffect != null)
+			Destroy (myEarthEffect.gameObject);
+		myEarthEffect = null;
+
+		StartCoroutine(CheckCards (earthMem));
+		earthMem = new CardScript[4];
+
+		foreach (GameObject gam in earthEfMem) {
+			if (gam != null)
+				Destroy (gam.gameObject);
+		}
+	}
+
+	public void EarthPlace(){
+		CardScript myCardS = new CardScript();
+
+		while (!(myCardS != null && myCardS.cardType != 0 && myCardS.isSelected != true)) {
+
+			Vector3 randPos = new Vector3 (Random.Range (0, myPlayer.cardGen.gridSizeX), Random.Range (0, myPlayer.cardGen.gridScaleY), 0);
+
+			myCardS = myPlayer.cardGen.allCards [(int)randPos.x, (int)randPos.y].GetComponent<CardScript> ();
+
+		}
+
+		myCardS.RotateSelf ();
+		myCardS.isSelected = true;
+
+		GameObject temp = (GameObject)Instantiate (PowerUpStuff.s.EarthSelectEffect, myCardS.transform.position, myCardS.transform.rotation);
+		if (earthEfMem [0] == null) {
+			earthEfMem [0] = temp;
+		} else {
+			earthEfMem [1] = temp;
+		}
+
+		if (earthMem [0] == null) {
+			earthMem [0] = myCardS;
+		} else {
+			earthMem [1] = myCardS;
+		}
+	}
+
+	public void EarthPreCheck(){
+
+		if (myPlayer.rotatedCards [0].cardType == earthMem [0].cardType) {
+			int myCardType = myPlayer.rotatedCards [0].cardType;
+
+			myPlayer.rotatedCards [0].cardType = 0;	
+			myPlayer.rotatedCards [0].isSelected = false;
+			myPlayer.rotatedCards [0] = null;
+			earthMem [0].cardType = 0;
+			earthMem [0].isSelected = false;
+			earthMem [0] = null;
+
+			ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
+
+		}
+
+
+	}
+
+	public void EarthCheck(){
+
+		earthMem [2] = myPlayer.rotatedCards [0];
+		earthMem [3] = myPlayer.rotatedCards [1];
+
+		foreach (GameObject gam in earthEfMem) {
+			if (gam != null)
+				Destroy (gam.gameObject);
+		}
+
+		StartCoroutine(CheckCards (earthMem));
+
+		myPlayer.rotatedCards [0] = null;
+		myPlayer.rotatedCards [1] = null;
+
+	}
+
+	//---------------------------------------------------------------------------------------------Done
+	void PoisonPowerUp(){ // 13
+		print ("PoisonPowerUp");
+		if (ScoreKeeper.s.players [myPlayer.id].Scores [13] > 0) {
+			ScoreKeeper.s.AddScore(myPlayer.id, 13, -1);
+			foreach(PowerUpDealer others in otherPlayers){
+				if (!others.isLightActive) {
+					others.DisablePoison ();
+					others.isPoisonActive = true;
+					others.poisonId = myPlayer.id;
+				}
+			}
+		}
+	}
+
+	void EnablePoison(){
+		CancelInvoke ("DisablePoison");
+
+		myPosionEffect = (GameObject)Instantiate (PowerUpStuff.s.PoisonEffect, transform.position, transform.rotation);
+		myPosionEffect.transform.parent = transform;
+
+		Invoke ("DisablePoison", PowerUpStuff.s.poisonTime);
+
+	}
+
+	public void DisablePoison(){
+		isPoisonActive = false;
+
+		if (myPosionEffect != null)
+			Destroy (myPosionEffect.gameObject);
+		myPosionEffect = null;
+	}
+
+	public void PoisonCheck(CardScript[] rotatedCards){
+
+		//got them correct
+		if (rotatedCards [0].cardType == rotatedCards [1].cardType) {
+			int myCardType = rotatedCards [0].cardType;
+
+			rotatedCards [0].cardType = 0;	
+			rotatedCards [0].isSelected = false;
+			rotatedCards [0] = null;
+			rotatedCards [1].cardType = 0;
+			rotatedCards [1].isSelected = false;
+			rotatedCards [1] = null;
+
+			ScoreKeeper.s.AddScore (poisonId, myCardType, 1);
+			ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
+
+		} else {
+			rotatedCards [0].RotateSelf ();
+			rotatedCards [0].isSelected = false;
+			rotatedCards [0] = null;
+			rotatedCards [1].RotateSelf ();
+			rotatedCards [1].isSelected = false;
+			rotatedCards [1] = null;
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------Done
+	void NetherPowerUp(){ // 12
+		print ("NetherPowerUp");
+		if (ScoreKeeper.s.players [myPlayer.id].Scores [12] > 0) {
+			ScoreKeeper.s.AddScore(myPlayer.id, 12, -1);
+			StartCoroutine(NetherActivate());
+		}
+	}
+
+	IEnumerator NetherActivate(){
+
+		//gfx
+		Instantiate(PowerUpStuff.s.NetherEffect, transform.position, transform.rotation);
+		//
+
+		//get cards
+
+		CardScript[] cardsToCheck = new CardScript[myPlayer.cardGen.gridSizeX + myPlayer.cardGen.gridSizeY + 5];
+		/*for (int i = 0; i < 11; i++) {
+			cardsToCheck [i] = new CardScript ();
+		}*/
+
+		if (myPlayer.rotatedCards [0] != null)
+			cardsToCheck [myPlayer.cardGen.gridSizeX + myPlayer.cardGen.gridSizeY + 4] = myPlayer.rotatedCards [0];
+
+
+		int n = 0;
+
+		Vector3 playerPos = myPlayer.playerPos;
+
+		CardScript myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y].GetComponent<CardScript> ();
+
+		RotateCard (myCardS, cardsToCheck, ref n);
+
+		for (int i = 1; i <= myPlayer.cardGen.gridSizeX + 1; i++) {
+
+			try {
+				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x + i, (int)playerPos.y].GetComponent<CardScript> ();
+			} catch {}
+
+			RotateCard (myCardS, cardsToCheck, ref n);
+
+			try {
+				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x - i, (int)playerPos.y].GetComponent<CardScript> ();
+			} catch {}
+			RotateCard (myCardS, cardsToCheck, ref n);
+
+			try {
+				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y + i].GetComponent<CardScript> ();
+			} catch {}
+			RotateCard (myCardS, cardsToCheck, ref n);
+
+			try {
+				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y - i].GetComponent<CardScript> ();
+			} catch {}
+			RotateCard (myCardS, cardsToCheck, ref n);
+
+			yield return new WaitForSeconds (0.02f);
+		}
+
+		yield return new WaitForSeconds (0.1f);
+
+		//check Cards
+		StartCoroutine (CheckCards (cardsToCheck));
+	}
+
+
+	//---------------------------------------------------------------------------------------------Done
+	void IcePowerUp(){ // 10
+		print ("IcePowerUp");
+		if (ScoreKeeper.s.players [myPlayer.id].Scores [10] > 0) {
+			ScoreKeeper.s.AddScore(myPlayer.id, 10, -1);
+			foreach(PowerUpDealer others in otherPlayers){
+				if (!others.isLightActive) {
+					others.DisableIce ();
+					others.isIceActive = true;
+				}
+			}
+		}
+	}
+
+	void EnableIce(){
+		CancelInvoke ("DisableIce");
+
+		myIceEffect = (GameObject)Instantiate (PowerUpStuff.s.IceEffect, transform.position, transform.rotation);
+		myIceEffect.transform.parent = transform;
+
+		Invoke ("DisableIce", PowerUpStuff.s.iceTime);
+
+		myPlayer.canMove = false;
+	}
+		
+	public void DisableIce(){
+		isIceActive = false;
+		myPlayer.canMove = true;
+
+		if (myIceEffect != null)
+			Destroy (myIceEffect.gameObject);
+		myIceEffect = null;
+	}
+
+	//------------------------------------------------------------------------------------------------------------------ helper/multiple used function
+	[System.Serializable]
+	public class NestedIntArray{
+		public int[] ar = new int[9];
+	}
+
+	void RotateCard(CardScript myCardScript, CardScript[] myCardsToCheck, ref int n){
+
+		if (myCardScript.cardType != 0) {
+			if (!myCardScript.isSelected) {
+
+				myCardScript.RotateSelf ();
+
+				myCardsToCheck [n] = myCardScript;
+				myCardScript.isSelected = true;
+
+				n++;
+			}
+		}
+
+	}
+
+	IEnumerator CheckCards(CardScript[] cardsToCheck){
+
+		//check Cards
+		for (int l = 0; l < cardsToCheck.Length; l++) {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
-				
-					for (int k = 1; k < 11; k++) {
+
+					for (int k = 1; k < cardsToCheck.Length; k++) {
 						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
 							if (cardsToCheck [k].cardType != 0) {
 								if (k != l) {
-							
+
 									if (cardsToCheck [k].cardType == cardsToCheck [l].cardType) {
-								
+
 										int myCardType = cardsToCheck [k].cardType;
 
 										cardsToCheck [k].cardType = 0;	
@@ -265,12 +625,11 @@ public class PowerUpDealer : MonoBehaviour {
 
 		yield return new WaitForSeconds (0.5f);
 
-		//rotate any unused card
-
-		for (int l = 0; l < 11; l++) {
+		//Rotate unused cards
+		for (int l = 0; l < cardsToCheck.Length; l++) {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
-				
+
 					cardsToCheck [l].RotateSelf ();
 					cardsToCheck [l].isSelected = false;
 					cardsToCheck [l] = null;
@@ -279,57 +638,6 @@ public class PowerUpDealer : MonoBehaviour {
 			}
 		}
 
-	}
-	//--------------------------------------------------------------------
-	void EarthPowerUp(){ // 8
-		print ("EarthPowerUp");
-		if (ScoreKeeper.s.players [myPlayer.id].Scores [11] > 0) {
-			ScoreKeeper.s.AddScore(myPlayer.id, 11, -1);
-
-		}
-	}
-	//--------------------------------------------------------------------
-	void PoisonPowerUp(){ // 13
-		print ("PoisonPowerUp");
-		if (ScoreKeeper.s.players [myPlayer.id].Scores [11] > 0) {
-			ScoreKeeper.s.AddScore(myPlayer.id, 11, -1);
-
-		}
-	}
-
-	void undoPoisonPowerUp(){
-		isLightActive = false;
-		Destroy (myLightEffect.gameObject);
-		myLightEffect = null;
-	}
-	//--------------------------------------------------------------------
-	void NetherPowerUp(){ // 12
-		print ("NetherPowerUp");
-		if (ScoreKeeper.s.players [myPlayer.id].Scores [11] > 0) {
-			ScoreKeeper.s.AddScore(myPlayer.id, 11, -1);
-
-		}
-	}
-	//--------------------------------------------------------------------
-	void IcePowerUp(){ // 10
-		print ("IcePowerUp");
-		if (ScoreKeeper.s.players [myPlayer.id].Scores [11] > 0) {
-			ScoreKeeper.s.AddScore(myPlayer.id, 11, -1);
-			foreach(PowerUpDealer others in otherPlayers){
-				others.isIceActive = true;
-			}
-		}
-	}
-
-	void undoIcePowerUp(){
-		isLightActive = false;
-		Destroy (myLightEffect.gameObject);
-		myLightEffect = null;
-	}
-	//----------------------------------------------------------------------------
-	[System.Serializable]
-	public class NestedIntArray{
-		public int[] ar = new int[9];
 	}
 
 	private bool compArrNAr (int[] arr1, NestedIntArray[] arr2){
