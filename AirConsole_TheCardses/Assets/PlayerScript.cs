@@ -151,6 +151,12 @@ public class PlayerScript : MonoBehaviour {
 
 		myCardS.RotateSelf ();
 		myCardS.isSelected = true;
+
+		if (powerUp.isShadowActive) {
+			powerUp.ShadowSelect(myCardS);
+			return;
+		}
+
 		GameObject temp = (GameObject)Instantiate (playerEffect, myCardS.transform.position, myCardS.transform.rotation);
 		if (playerEffectMem [0] == null) {
 			playerEffectMem [0] = temp;
@@ -177,11 +183,6 @@ public class PlayerScript : MonoBehaviour {
 		foreach (GameObject gam in playerEffectMem) {
 			if (gam != null)
 				Destroy (gam.gameObject);
-		}
-
-		if (powerUp.isShadowActive) {
-			powerUp.ShadowCheck(rotatedCards);
-			return;
 		}
 
 		if (powerUp.isPoisonActive) {

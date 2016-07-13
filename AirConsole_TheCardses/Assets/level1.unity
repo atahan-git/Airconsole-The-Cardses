@@ -684,7 +684,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e37d83ebce05ad74683fd3228dde9e7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  browserStartMode: 0
+  browserStartMode: 2
   controllerHtml: {fileID: 4900000, guid: e231cdcb1943d16429c39955198199ea, type: 3}
   autoScaleCanvas: 1
 --- !u!4 &201471487
@@ -879,8 +879,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightTime: 10
   LightEffect: {fileID: 126538, guid: f162faa41931c6245812129e12f574b5, type: 2}
-  shadowTime: 10
+  shadowTime: 5
   ShadowEffect: {fileID: 123844, guid: e27571e759660324b98add77eb6b9287, type: 2}
+  ShadowSelectEffect: {fileID: 142776, guid: 5ae52ee496ad94c4892fc86bef63c873, type: 2}
   shadowMultiplier: 4
   poisonTime: 10
   PoisonEffect: {fileID: 106310, guid: 0d151beff6f722f4fbd4fda3d6493b80, type: 2}

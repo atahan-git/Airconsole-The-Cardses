@@ -9,6 +9,7 @@ public class PowerUpStuff : MonoBehaviour {
 	public GameObject LightEffect;
 	public float shadowTime = 10f;
 	public GameObject ShadowEffect;
+	public GameObject ShadowSelectEffect;
 	public float shadowMultiplier = 2f;
 	public float poisonTime = 10f;
 	public GameObject PoisonEffect;
