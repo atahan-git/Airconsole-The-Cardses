@@ -16,6 +16,11 @@ public class CardGenerator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
+
+		if (DataHandler.s != null) {
+
+		}
+
 		SetUpGrid ();
 	}
 	

@@ -11,9 +11,12 @@ public class DataHandler : MonoBehaviour {
 
 	public static int gameSetting = 120;
 
-	// Use this for initialization
-	void Start () {
+	public static DataHandler s;
 
+	// Use this for initialization
+	void Awake () {
+
+		s = this;
 		DontDestroyOnLoad (gameObject);
 	
 	}

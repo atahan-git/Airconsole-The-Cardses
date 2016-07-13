@@ -235,7 +235,7 @@ public class PowerUpDealer : MonoBehaviour {
 				Destroy (gam.gameObject);
 		}
 
-		StartCoroutine (CheckCardsCOROT (ShadowMem));
+		StartCoroutine (CheckCardsCOROT (ShadowMem, 7));
 
 		isShadowActive = false;
 		if (myShadowEffect != null)
@@ -310,7 +310,7 @@ public class PowerUpDealer : MonoBehaviour {
 		yield return new WaitForSeconds (0.3f);
 
 		//check Cards
-		StartCoroutine (CheckCardsCOROT (cardsToCheck));
+		StartCoroutine (CheckCardsCOROT (cardsToCheck, 2));
 	}
 
 
@@ -340,7 +340,7 @@ public class PowerUpDealer : MonoBehaviour {
 			Destroy (myEarthEffect.gameObject);
 		myEarthEffect = null;
 
-		StartCoroutine(CheckCardsCOROT (earthMem));
+		StartCoroutine(CheckCardsCOROTquick (earthMem , 1));
 		earthMem = new CardScript[4];
 
 		foreach (GameObject gam in earthEfMem) {
@@ -406,7 +406,7 @@ public class PowerUpDealer : MonoBehaviour {
 				Destroy (gam.gameObject);
 		}
 
-		StartCoroutine(CheckCardsCOROT (earthMem));
+		StartCoroutine(CheckCardsCOROT (earthMem, 1));
 
 		myPlayer.rotatedCards [0] = null;
 		myPlayer.rotatedCards [1] = null;
@@ -464,7 +464,7 @@ public class PowerUpDealer : MonoBehaviour {
 			rotatedCards [1].isSelected = false;
 			rotatedCards [1] = null;
 
-			ScoreKeeper.s.AddScore (poisonId, myCardType, 1);
+			ScoreKeeper.s.AddScore (poisonId, 6 /*myCardType*/, 1);
 			ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
 
 		} else {
@@ -477,7 +477,11 @@ public class PowerUpDealer : MonoBehaviour {
 		}
 	}
 
-	//---------------------------------------------------------------------------------------------/Done/ NetherPowerUp  --------------------------------
+	public void PoisonDragon(int cardType){
+		ScoreKeeper.s.AddScore (poisonId, 13 /*cardType*/, 1);
+	}
+
+	//---------------------------------------------------------------------------------------------Done NetherPowerUp
 	void NetherPowerUp(){ // 12
 		print ("NetherPowerUp");
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [12] > 0) {
@@ -485,63 +489,36 @@ public class PowerUpDealer : MonoBehaviour {
 			StartCoroutine(NetherActivate());
 		}
 	}
+	//rotatedCards [0]._ReSelectTime = rotatedCards [0].ReSelectTime * PowerUpStuff.s.shadowMultiplier;
 
 	IEnumerator NetherActivate(){
 
-		//gfx
-		Instantiate(PowerUpStuff.s.NetherEffect, transform.position, transform.rotation);
-		//
+		for (int y = 0; y < myPlayer.cardGen.gridSizeY; y++) {
+			for (int x = 0; x < myPlayer.cardGen.gridSizeX; x++) {
 
-		//get cards
+				CardScript myCardS = myPlayer.cardGen.allCards [x, y].GetComponent<CardScript> ();
 
-		CardScript[] cardsToCheck = new CardScript[myPlayer.cardGen.gridSizeX + myPlayer.cardGen.gridSizeY + 5];
-		/*for (int i = 0; i < 11; i++) {
-			cardsToCheck [i] = new CardScript ();
-		}*/
-
-		if (myPlayer.rotatedCards [0] != null)
-			cardsToCheck [myPlayer.cardGen.gridSizeX + myPlayer.cardGen.gridSizeY + 4] = myPlayer.rotatedCards [0];
-
-
-		int n = 0;
-
-		Vector3 playerPos = myPlayer.playerPos;
-
-		CardScript myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y].GetComponent<CardScript> ();
-
-		RotateCard (myCardS, cardsToCheck, ref n);
-
-		for (int i = 1; i <= myPlayer.cardGen.gridSizeX + 1; i++) {
-
-			try {
-				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x + i, (int)playerPos.y].GetComponent<CardScript> ();
-			} catch {}
-
-			RotateCard (myCardS, cardsToCheck, ref n);
-
-			try {
-				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x - i, (int)playerPos.y].GetComponent<CardScript> ();
-			} catch {}
-			RotateCard (myCardS, cardsToCheck, ref n);
-
-			try {
-				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y + i].GetComponent<CardScript> ();
-			} catch {}
-			RotateCard (myCardS, cardsToCheck, ref n);
-
-			try {
-				myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y - i].GetComponent<CardScript> ();
-			} catch {}
-			RotateCard (myCardS, cardsToCheck, ref n);
-
-			yield return new WaitForSeconds (0.02f);
+				if (!myCardS.isSelected) {
+					
+					if (myCardS.cardType == 0) {
+						ScoreKeeper.s.AddScore (myPlayer.id, 5, 1);
+						Instantiate (myCardS.getEffect, myCardS.transform.position, myCardS.transform.rotation);
+						//myCardS.cardType = 5;
+						//myCardS.cardType = 0;
+						yield return new WaitForSeconds(0.2f);
+					} else {
+						myCardS.CoolRotate ();
+						myCardS.Invoke ("SelfClose", PowerUpStuff.s.NetherReRotateTime);
+						myCardS.isSelected = true;
+					}
+				}
+				yield return new WaitForSeconds(0.005f);
+			}
 		}
 
-		yield return new WaitForSeconds (0.1f);
-
-		//check Cards
-		StartCoroutine (CheckCardsCOROT (cardsToCheck));
 	}
+
+
 
 
 	//---------------------------------------------------------------------------------------------Done IcePowerUp
@@ -605,12 +582,90 @@ public class PowerUpDealer : MonoBehaviour {
 
 	}
 
-	IEnumerator CheckCardsCOROT(CardScript[] cardsToCheck){
+	IEnumerator CheckCardsCOROT(CardScript[] cardsToCheck, int cardType){
 
 		//check Cards
 		for (int l = 0; l < cardsToCheck.Length; l++) {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
+
+					if(cardsToCheck[l].cardType >= 8){
+
+						ScoreKeeper.s.AddScore(myPlayer.id, cardType + 7, 1);
+
+						if(isPoisonActive)
+							PoisonDragon (cardsToCheck[l].cardType);
+
+						cardsToCheck[l].cardType = 0;
+						cardsToCheck[l].isSelected = false;
+					}
+
+					for (int k = 1; k < cardsToCheck.Length; k++) {
+						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
+							if (cardsToCheck [k].cardType != 0) {
+								if (k != l) {
+
+									if (cardsToCheck [k].cardType == cardsToCheck [l].cardType) {
+
+										int myCardType = cardsToCheck [k].cardType;
+
+										cardsToCheck [k].cardType = 0;	
+										//rotatedCards [0].SetColor ();
+										cardsToCheck [k].isSelected = false;
+										cardsToCheck [k] = null;
+										cardsToCheck [l].cardType = 0;
+										//rotatedCards [1].SetColor ();
+										cardsToCheck [l].isSelected = false;
+										cardsToCheck [l] = null;
+
+										ScoreKeeper.s.AddScore (myPlayer.id, cardType, 1);
+										if(isPoisonActive)
+											ScoreKeeper.s.AddScore (poisonId, 6 /*myCardType*/, 1);
+
+										yield return new WaitForSeconds (0.1f);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		yield return new WaitForSeconds (0.5f);
+
+		//Rotate unused cards
+		for (int l = 0; l < cardsToCheck.Length; l++) {
+			if (cardsToCheck [l] != null) {
+				if (cardsToCheck [l].cardType != 0) {
+
+					cardsToCheck [l].RotateSelf ();
+					cardsToCheck [l].isSelected = false;
+					cardsToCheck [l] = null;
+
+				}
+			}
+		}
+
+	}
+
+	IEnumerator CheckCardsCOROTquick(CardScript[] cardsToCheck, int cardType){
+
+		//check Cards
+		for (int l = 0; l < cardsToCheck.Length; l++) {
+			if (cardsToCheck [l] != null) {
+				if (cardsToCheck [l].cardType != 0) {
+
+					if(cardsToCheck[l].cardType >= 8){
+
+						ScoreKeeper.s.AddScore(myPlayer.id, cardType + 7, 1);
+
+						if(isPoisonActive)
+							PoisonDragon (cardsToCheck[l].cardType);
+
+						cardsToCheck[l].cardType = 0;
+						cardsToCheck[l].isSelected = false;
+					}
 
 					for (int k = 1; k < cardsToCheck.Length; k++) {
 						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
@@ -631,8 +686,10 @@ public class PowerUpDealer : MonoBehaviour {
 										cardsToCheck [l] = null;
 
 										ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
+										if(isPoisonActive)
+											ScoreKeeper.s.AddScore (poisonId, 6 /*myCardType*/, 1);
 
-										yield return new WaitForSeconds (0.1f);
+										//yield return new WaitForSeconds (0.1f);
 									}
 								}
 							}
@@ -642,7 +699,7 @@ public class PowerUpDealer : MonoBehaviour {
 			}
 		}
 
-		yield return new WaitForSeconds (0.5f);
+		yield return new WaitForSeconds (0f);
 
 		//Rotate unused cards
 		for (int l = 0; l < cardsToCheck.Length; l++) {
@@ -705,4 +762,59 @@ public class PowerUpDealer : MonoBehaviour {
 			rotatedCards [1] = null;
 		}
 	}*/
+
+
+	/*IEnumerator NetherActivate(){
+
+	//gfx
+	Instantiate(PowerUpStuff.s.NetherEffect, transform.position, transform.rotation);
+	//
+
+	//get cards
+
+	CardScript[] cardsToCheck = new CardScript[myPlayer.cardGen.gridSizeX + myPlayer.cardGen.gridSizeY + 5];
+
+	if (myPlayer.rotatedCards [0] != null)
+		cardsToCheck [myPlayer.cardGen.gridSizeX + myPlayer.cardGen.gridSizeY + 4] = myPlayer.rotatedCards [0];
+
+
+	int n = 0;
+
+	Vector3 playerPos = myPlayer.playerPos;
+
+	CardScript myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y].GetComponent<CardScript> ();
+
+	RotateCard (myCardS, cardsToCheck, ref n);
+
+	for (int i = 1; i <= myPlayer.cardGen.gridSizeX + 1; i++) {
+
+		try {
+			myCardS = myPlayer.cardGen.allCards [(int)playerPos.x + i, (int)playerPos.y].GetComponent<CardScript> ();
+		} catch {}
+
+		RotateCard (myCardS, cardsToCheck, ref n);
+
+		try {
+			myCardS = myPlayer.cardGen.allCards [(int)playerPos.x - i, (int)playerPos.y].GetComponent<CardScript> ();
+		} catch {}
+		RotateCard (myCardS, cardsToCheck, ref n);
+
+		try {
+			myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y + i].GetComponent<CardScript> ();
+		} catch {}
+		RotateCard (myCardS, cardsToCheck, ref n);
+
+		try {
+			myCardS = myPlayer.cardGen.allCards [(int)playerPos.x, (int)playerPos.y - i].GetComponent<CardScript> ();
+		} catch {}
+		RotateCard (myCardS, cardsToCheck, ref n);
+
+		yield return new WaitForSeconds (0.02f);
+	}
+
+	yield return new WaitForSeconds (0.1f);
+
+	//check Cards
+	StartCoroutine (CheckCardsCOROT (cardsToCheck));
+}*/
 }

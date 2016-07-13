@@ -14,9 +14,10 @@ public class PlayerScript : MonoBehaviour {
 	public PlayerAssigner master;
 	public PowerUpDealer powerUp;
 
-	public float animSpeed = 20f;
-	public float moveSpeed = 0.5f;//lower the better
+	float animSpeed = 20f;
+	public float moveSpeed = 0.3f;//lower the better
 	float CheckSpeed = 0.3f;
+	public float JoystickDeadZone = 0.5f;
 
 	[HideInInspector]
 	public CardScript[] rotatedCards = new CardScript[2];
@@ -71,14 +72,15 @@ public class PlayerScript : MonoBehaviour {
 	}
 
 	void OnMessage (int device_id, JToken data) {
-		//print (data);
 		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
 		if (active_player != -1) {
+			//print ("player is legit");
 			if (active_player == id) {
+				//print ("player is us " + id);
 				//print ("got something4");
-				//print (data);
-				if (data ["dpadrelative-left "] != null) {
-					
+				print(data);
+				if (data ["swipedigital-left"] != null) {
+					//print ("TryMove");
 					if(!canMove)
 						return;
 					Move (data);
@@ -95,49 +97,24 @@ public class PlayerScript : MonoBehaviour {
 		}
 	}
 
+	Coroutine moveRoutine;
+
 	void Move(JToken data){
-		//start moving
-		if ((bool)data ["dpadrelative-left"] ["pressed"]) {
+
+		if ((bool)data ["swipedigital-left"] ["pressed"]) {
 			//print ("got something5");
 
-			switch ((string)data ["dpadrelative-left"] ["message"] ["direction"]) {
-			case "right":
-				print ("Right");
-				StartCoroutine (MoveStep (new Vector3 (1, 0, 0), moveSpeed));
-				break;
-			case "left":
-				print ("Left");
-				StartCoroutine (MoveStep (new Vector3 (-1, 0, 0), moveSpeed));
-				break;
-			case "up":
-				print ("Up");
-				StartCoroutine (MoveStep (new Vector3 (0, 1, 0), moveSpeed));
-				break;
-			case "down":
-				print ("Down");
-				StartCoroutine (MoveStep (new Vector3 (0, -1, 0), moveSpeed));
-				break;
-			default:
-				print ("error");
-				break;
-			}
+			if((bool)data ["swipedigital-left"] ["message"] ["right"])
+				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
+			if((bool)data ["swipedigital-left"] ["message"] ["left"])
+				playerPos = AddVectors (playerPos, new Vector3 (-1, 0, 0));
+			if((bool)data ["swipedigital-left"] ["message"] ["up"])
+				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
+			if((bool)data ["swipedigital-left"] ["message"] ["down"])
+				playerPos = AddVectors (playerPos, new Vector3 (0, -1, 0));
 
-			// stop moving
-		} else {
-			print ("stopped moving");
-			StopCoroutine ("MoveStep");
 		}
-
-	}
-
-	IEnumerator MoveStep(Vector3 moveAm, float repeatRate) {
-		print ("started to move");
-		while(true) {
-			playerPos = AddVectors (playerPos, moveAm);
-			playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
-
-			yield return new WaitForSeconds(repeatRate);
-		}
+		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
 	}
 
 	void PressSelect(){
@@ -147,6 +124,8 @@ public class PlayerScript : MonoBehaviour {
 		if (myCardS.cardType == 0)
 			return;
 		if (myCardS.isSelected)
+			return;
+		if (rotatedCards [1] != null)
 			return;
 
 		myCardS.RotateSelf ();
@@ -158,6 +137,12 @@ public class PlayerScript : MonoBehaviour {
 		}
 
 		GameObject temp = (GameObject)Instantiate (playerEffect, myCardS.transform.position, myCardS.transform.rotation);
+
+		if(myCardS.cardType >= 8){
+			StartCoroutine (DragonCheck(myCardS, temp));
+			return;
+		}
+
 		if (playerEffectMem [0] == null) {
 			playerEffectMem [0] = temp;
 		} else {
@@ -176,6 +161,24 @@ public class PlayerScript : MonoBehaviour {
 			rotatedCards [1] = myCardS;
 			Invoke ("CheckCards", CheckSpeed);
 		}
+	}
+
+	IEnumerator DragonCheck(CardScript myCardS, GameObject temp){
+
+		Instantiate (myCardS.getEffect, myCardS.transform.position, myCardS.transform.rotation);
+
+		yield return new WaitForSeconds (CheckSpeed * 3);
+
+		ScoreKeeper.s.AddScore(id, myCardS.cardType, 1);
+
+		if (powerUp.isPoisonActive) {
+			powerUp.PoisonDragon (myCardS.cardType);
+		}
+
+		myCardS.cardType = 0;	
+		myCardS.isSelected = false;
+
+		Destroy (temp);
 	}
 
 	void CheckCards(){
@@ -227,10 +230,10 @@ public class PlayerScript : MonoBehaviour {
 	//old move script
 	/*void Move(JToken data){
 		
-		if ((bool)data ["dpad-left"] ["pressed"]) {
+		if ((bool)data ["dpadrelative-left"] ["pressed"]) {
 			//print ("got something5");
 
-			switch ((string)data ["dpad-left"] ["message"] ["direction"]) {
+			switch ((string)data ["dpadrelative-left"] ["message"] ["direction"]) {
 			case "right":
 				playerPos = AddVectors (playerPos, new Vector3 (1, 0, 0));
 				break;
@@ -250,5 +253,152 @@ public class PlayerScript : MonoBehaviour {
 
 		}
 		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+	}*/
+
+	//other old move
+	/*void Move(JToken data){
+		//print ("Moving");
+		//start moving
+		print(data);
+		if ((bool)data ["dpadrelative-left"] ["pressed"]) {
+			//print ("got something5");
+
+			switch ((string)data ["dpadrelative-left"] ["message"] ["direction"]) {
+			case "right":
+				print ("Right");
+				try {
+					StopCoroutine (moveRoutine);
+				} catch {}
+				moveRoutine = StartCoroutine (MoveStep (new Vector3 (1, 0, 0), moveSpeed));
+				break;
+			case "left":
+				print ("Left");
+				try {
+					StopCoroutine (moveRoutine);
+				} catch {}
+				moveRoutine = StartCoroutine (MoveStep (new Vector3 (-1, 0, 0), moveSpeed));
+				break;
+			case "up":
+				print ("Up");
+				try {
+					StopCoroutine (moveRoutine);
+				} catch {}
+				moveRoutine = StartCoroutine (MoveStep (new Vector3 (0, 1, 0), moveSpeed));
+				break;
+			case "down":
+				print ("Down");
+				try {
+					StopCoroutine (moveRoutine);
+				} catch {}
+				moveRoutine = StartCoroutine (MoveStep (new Vector3 (0, -1, 0), moveSpeed));
+				break;
+			default:
+				print ("error");
+				break;
+			}
+
+			// stop moving
+		} else {
+			print ("stopped moving");
+			try {
+				StopCoroutine (moveRoutine);
+			} catch {}
+		}
+
+	}
+
+	IEnumerator MoveStep(Vector3 moveAm, float repeatRate) {
+		//print ("started to move");
+		while(true) {
+			playerPos = AddVectors (playerPos, moveAm);
+			playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+			//print (moveAm);
+			yield return new WaitForSeconds(repeatRate);
+		}
+	}*/
+
+	/*bool moveLock = false;
+
+	void Move(JToken data){
+		//print ("Moving");
+		//start moving
+		print(data);
+		if ((bool)data ["joystick-left"] ["pressed"]) {
+			//print ("got something5");
+
+			float x = (float)data ["joystick-left"] ["message"] ["x"];
+			float y = -(float)data ["joystick-left"] ["message"] ["y"];
+			//is x or y is first
+			if (Mathf.Abs (x) < JoystickDeadZone && Mathf.Abs (y) < JoystickDeadZone) {
+				print ("stopped moving");
+				try {
+					StopCoroutine (moveRoutine);
+				} catch {}
+			}
+
+			if (Mathf.Abs (x) >= Mathf.Abs (y)) {
+				//is x big or small enough
+				if (x > JoystickDeadZone) {
+					print ("Right");
+					try {
+						StopCoroutine (moveRoutine);
+					} catch {}
+					moveRoutine = StartCoroutine (MoveStep (new Vector3 (1, 0, 0), moveSpeed));
+
+				} else if (x < -JoystickDeadZone) {
+					print ("Left");
+					try {
+						StopCoroutine (moveRoutine);
+					} catch {}
+					moveRoutine = StartCoroutine (MoveStep (new Vector3 (-1, 0, 0), moveSpeed));
+
+				}
+			} else {
+				if (y > JoystickDeadZone) {
+					print ("Up");
+					try {
+						StopCoroutine (moveRoutine);
+					} catch {}
+					moveRoutine = StartCoroutine (MoveStep (new Vector3 (0, 1, 0), moveSpeed));
+
+				} else if (y < -JoystickDeadZone) {
+					print ("Down");
+					try {
+						StopCoroutine (moveRoutine);
+					} catch {}
+					moveRoutine = StartCoroutine (MoveStep (new Vector3 (0, -1, 0), moveSpeed));
+
+				}
+			}
+
+
+
+			// stop moving
+		} else {
+			print ("stopped moving");
+			try {
+				StopCoroutine (moveRoutine);
+			} catch {}
+		}
+
+	}
+
+	IEnumerator MoveStep(Vector3 moveAm, float repeatRate) {
+		//print ("started to move");
+		while (moveLock) {
+			yield return 0;
+		}
+		while(true) {
+			moveLock = true;
+			Invoke ("EndLock", repeatRate);
+			playerPos = AddVectors (playerPos, moveAm);
+			playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY - 1), 0);
+			//print (moveAm);
+			yield return new WaitForSeconds(repeatRate);
+		}
+	}
+
+	void EndLock(){
+		moveLock = false;
 	}*/
 }

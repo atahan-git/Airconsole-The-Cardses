@@ -10,7 +10,7 @@ public class PowerUpStuff : MonoBehaviour {
 	public float shadowTime = 10f;
 	public GameObject ShadowEffect;
 	public GameObject ShadowSelectEffect;
-	public float shadowMultiplier = 2f;
+	//public float shadowMultiplier = 2f;
 	public float poisonTime = 10f;
 	public GameObject PoisonEffect;
 	public float iceTime = 5f;
@@ -20,6 +20,7 @@ public class PowerUpStuff : MonoBehaviour {
 	public GameObject EarthSelectEffect;
 
 	public GameObject FireEffect;
+	public float NetherReRotateTime = 0.5f;
 	public GameObject NetherEffect;
 
 	// Use this for initialization

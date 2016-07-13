@@ -19,8 +19,10 @@ public class CardScript : MonoBehaviour {
 			_cardType = value;
 			SetColor ();
 
-			if (_cardType == 0)
+			if (_cardType == 0) {
 				CoolRotate ();
+				state = true;
+			}
 		}
 	}
 
@@ -69,8 +71,9 @@ public class CardScript : MonoBehaviour {
 		sRend.sprite = sprites[cardType];
 		if (cardType == 0) {
 			//print ("invoke pls");
-			Invoke ("RotateSelf", _ReSelectTime - 0.5f);
+			Invoke ("RotateSelf", _ReSelectTime - 0.3f);
 			Invoke ("SelectRandomCardType", _ReSelectTime);
+			Instantiate (getEffect, transform.position, transform.rotation);
 		}
 	}
 
@@ -111,11 +114,8 @@ public class CardScript : MonoBehaviour {
 	}
 
 	public void CoolRotate(){
-
 		StartCoroutine ("changeIt");
 		Invoke ("EndCoolRotate", 0.5f);
-
-		Instantiate (getEffect, transform.position, transform.rotation);
 	}
 	IEnumerator changeIt(){
 		while (true) {
@@ -129,6 +129,12 @@ public class CardScript : MonoBehaviour {
 		StopCoroutine ("changeIt");
 		//transform.rotation = openPos;
 		goToRot = openPos;
+	}
+
+	public void SelfClose(){
+		isSelected = false;
+		goToRot = defPos;
+		Invoke ("SelectRandomCardType", 0.3f);
 	}
 
 	public CardScript(){

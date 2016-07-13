@@ -266,14 +266,15 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4bed67086d289a741a0cb530333c054e, type: 3}
   - {fileID: 21300000, guid: a190fe37bb67cea458b2d45b0815a05c, type: 3}
   - {fileID: 21300000, guid: 7eb7fa68da783994cb86b9a108661048, type: 3}
-  - {fileID: 21300000, guid: 25ac04e89968fe747b9e2cd1eef0c9e9, type: 3}
-  - {fileID: 21300000, guid: b553134c8b0326e489129e071d432ec1, type: 3}
-  - {fileID: 21300000, guid: 11af3283a89b9d34599de816d312772d, type: 3}
-  - {fileID: 21300000, guid: ef2f3dfea8d744748aedda8c7ac0bffc, type: 3}
+  - {fileID: 21300000, guid: e9620ce90da06f84ebdeb4f35188d23b, type: 3}
+  - {fileID: 21300000, guid: 415d7ce574cc56249a0785b3bcfc312f, type: 3}
+  - {fileID: 21300000, guid: 68091dc5a90a18745b5a6e7a63945326, type: 3}
+  - {fileID: 21300000, guid: b315fdee0eee204409ded6580b232a35, type: 3}
   sRend: {fileID: 21254408}
   state: 0
   rotSpeed: 20
   ReSelectTime: 5
+  _ReSelectTime: 5
   dragonChance: 6
   isSelected: 0
   getEffect: {fileID: 143876, guid: b9212b2297277784cbd7592b401eb9e4, type: 2}

@@ -684,8 +684,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e37d83ebce05ad74683fd3228dde9e7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  browserStartMode: 0
-  controllerHtml: {fileID: 4900000, guid: e231cdcb1943d16429c39955198199ea, type: 3}
+  browserStartMode: 2
+  controllerHtml: {fileID: 4900000, guid: d3e3c697a8a81434492fc6e04f837cda, type: 3}
   autoScaleCanvas: 1
 --- !u!4 &201471487
 Transform:
@@ -877,20 +877,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b7042018e37831458af6f450e420f7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lightTime: 10
+  lightTime: 15
   LightEffect: {fileID: 126538, guid: f162faa41931c6245812129e12f574b5, type: 2}
-  shadowTime: 5
+  shadowTime: 6
   ShadowEffect: {fileID: 123844, guid: e27571e759660324b98add77eb6b9287, type: 2}
   ShadowSelectEffect: {fileID: 142776, guid: 5ae52ee496ad94c4892fc86bef63c873, type: 2}
-  shadowMultiplier: 4
   poisonTime: 10
   PoisonEffect: {fileID: 106310, guid: 0d151beff6f722f4fbd4fda3d6493b80, type: 2}
-  iceTime: 5
+  iceTime: 8
   IceEffect: {fileID: 114782, guid: d7b1e4bf378754a41a5c6ecf925c6f2e, type: 2}
-  earthTime: 5
+  earthTime: 10
   EarthEffect: {fileID: 121692, guid: 677a0cd884bb0ed4bb3f3946ea77fc3e, type: 2}
   EarthSelectEffect: {fileID: 114392, guid: 33f5333e95960cb48891a0f84778582d, type: 2}
   FireEffect: {fileID: 157526, guid: 795736b42963a0741b3d56004f1e49bd, type: 2}
+  NetherReRotateTime: 1
   NetherEffect: {fileID: 125818, guid: 4752c1d5471fa6347989698e00e9e499, type: 2}
 --- !u!1 &280860414
 GameObject:
@@ -3886,8 +3886,8 @@ MonoBehaviour:
   cardGen: {fileID: 988072160}
   master: {fileID: 1292795393}
   powerUp: {fileID: 764481664}
-  animSpeed: 20
-  moveSpeed: 0.5
+  moveSpeed: 0.3
+  JoystickDeadZone: 0.5
   rotatedCards:
   - {fileID: 0}
   - {fileID: 0}
@@ -4839,8 +4839,8 @@ MonoBehaviour:
   cardGen: {fileID: 988072160}
   master: {fileID: 1292795393}
   powerUp: {fileID: 909817639}
-  animSpeed: 20
-  moveSpeed: 0.5
+  moveSpeed: 0.3
+  JoystickDeadZone: 0.5
   rotatedCards:
   - {fileID: 0}
   - {fileID: 0}
@@ -5952,10 +5952,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4bed67086d289a741a0cb530333c054e, type: 3}
   - {fileID: 21300000, guid: a190fe37bb67cea458b2d45b0815a05c, type: 3}
   - {fileID: 21300000, guid: 7eb7fa68da783994cb86b9a108661048, type: 3}
-  - {fileID: 21300000, guid: 25ac04e89968fe747b9e2cd1eef0c9e9, type: 3}
-  - {fileID: 21300000, guid: b553134c8b0326e489129e071d432ec1, type: 3}
-  - {fileID: 21300000, guid: 11af3283a89b9d34599de816d312772d, type: 3}
-  - {fileID: 21300000, guid: ef2f3dfea8d744748aedda8c7ac0bffc, type: 3}
+  - {fileID: 21300000, guid: e9620ce90da06f84ebdeb4f35188d23b, type: 3}
+  - {fileID: 21300000, guid: 415d7ce574cc56249a0785b3bcfc312f, type: 3}
+  - {fileID: 21300000, guid: 68091dc5a90a18745b5a6e7a63945326, type: 3}
+  - {fileID: 21300000, guid: b315fdee0eee204409ded6580b232a35, type: 3}
 --- !u!4 &1134999524
 Transform:
   m_ObjectHideFlags: 0
@@ -9176,7 +9176,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 0.23529412, g: 0.3137255, b: 1, a: 0.392}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -11433,7 +11433,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 0.2352941, b: 0.3137255, a: 0.392}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

@@ -14,6 +14,7 @@ public class PlayerAssigner : MonoBehaviour {
 	public int scorePlayerBlue = 0;
 
 	void Awake () {
+		Debug.Log ("Started");
 		//AirConsole.instance.onMessage += OnMessage;
 		uiText.text = "NEED MORE PLAYERS";
 		AirConsole.instance.onConnect += OnConnect;
@@ -30,6 +31,8 @@ public class PlayerAssigner : MonoBehaviour {
 	/// </summary>
 	/// <param name="device_id">The device_id that connected</param>
 	void OnConnect (int device_id) {
+		/*AirConsole.instance.SetActivePlayers (1);
+		return;*/
 		if (AirConsole.instance.GetActivePlayerDeviceIds.Count == 0) {
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
 				StartGame ();
@@ -74,6 +77,7 @@ public class PlayerAssigner : MonoBehaviour {
 	}*/
 
 	void StartGame () {
+		print ("GameStarted");
 		AirConsole.instance.SetActivePlayers (2);
 		ResetGame ();
 		scorePlayerRed = 0;
