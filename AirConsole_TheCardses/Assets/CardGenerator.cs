@@ -30,7 +30,7 @@ public class CardGenerator : MonoBehaviour {
 		DeleteCards ();
 
 		//give us a better centered position
-		transform.position = new Vector3 (transform.position.x - gridScaleX * (gridSizeX/2 - 0.5f), transform.position.y - gridScaleY * (gridSizeY/2 - 0.5f), transform.position.z);
+		transform.position = new Vector3 (transform.position.x - gridScaleX * ((float)gridSizeX/2f - 0.5f), transform.position.y - gridScaleY * ((float)gridSizeY/2f - 0.5f), transform.position.z);
 
 		//set up arrays according to the sizes that are given to us
 		grid = new Vector3[gridSizeX,gridSizeY];

@@ -207,7 +207,7 @@ public class PowerUpDealer : MonoBehaviour {
 	}
 
 
-	//---------------------------------------------------------------------------------------------/Done/ ShadowPowerUp
+	//---------------------------------------------------------------------------------------------Done ShadowPowerUp
 	CardScript[] ShadowMem = new CardScript[99];
 	GameObject[] ShadowEffMem = new GameObject[99];
 	int n = 0;
@@ -477,7 +477,7 @@ public class PowerUpDealer : MonoBehaviour {
 		}
 	}
 
-	//---------------------------------------------------------------------------------------------Done NetherPowerUp
+	//---------------------------------------------------------------------------------------------/Done/ NetherPowerUp  --------------------------------
 	void NetherPowerUp(){ // 12
 		print ("NetherPowerUp");
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [12] > 0) {
