@@ -13,7 +13,7 @@ public class PlayerSetter : MonoBehaviour {
 		//AirConsole.instance.onMessage += OnMessage;
 		uiText.text = "NEED MORE PLAYERS";
 		AirConsole.instance.onConnect += OnConnect;
-		AirConsole.instance.onDisconnect += OnDisconnect;
+		//AirConsole.instance.onDisconnect += OnDisconnect;
 	}
 
 	/// <summary>
@@ -48,7 +48,7 @@ public class PlayerSetter : MonoBehaviour {
 	/// If the game is running and one of the active players leaves, we reset the game.
 	/// </summary>
 	/// <param name="device_id">The device_id that has left.</param>
-	void OnDisconnect (int device_id) {
+	/*void OnDisconnect (int device_id) {
 		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
 		if (active_player != -1) {
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
@@ -59,7 +59,7 @@ public class PlayerSetter : MonoBehaviour {
 				uiText.text = "PLAYER LEFT - NEED MORE PLAYERS";
 			}
 		}
-	}
+	}*/
 
 	/// <summary>
 	/// We check which one of the active players has moved the paddle.
@@ -87,7 +87,7 @@ public class PlayerSetter : MonoBehaviour {
 	void SetPlayers(int number){
 		print ("set playter sd");
 		AirConsole.instance.SetActivePlayers (number);
-		uiText.text = "Ready: Have " + number + " players avalaible";
+		uiText.text = number + " players ready";
 	}
 
 	void ResetGame () {

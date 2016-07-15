@@ -340,7 +340,8 @@ public class PowerUpDealer : MonoBehaviour {
 			Destroy (myEarthEffect.gameObject);
 		myEarthEffect = null;
 
-		StartCoroutine(CheckCardsCOROTquick (earthMem , 1));
+		EarthCheck ();
+		//CheckCardsCOROTquick (earthMem , 1);
 		earthMem = new CardScript[4];
 
 		foreach (GameObject gam in earthEfMem) {
@@ -406,7 +407,7 @@ public class PowerUpDealer : MonoBehaviour {
 				Destroy (gam.gameObject);
 		}
 
-		StartCoroutine(CheckCardsCOROT (earthMem, 1));
+		CheckCardsCOROTquick (earthMem, 1);
 
 		myPlayer.rotatedCards [0] = null;
 		myPlayer.rotatedCards [1] = null;
@@ -494,6 +495,10 @@ public class PowerUpDealer : MonoBehaviour {
 	IEnumerator NetherActivate(){
 
 		for (int y = 0; y < myPlayer.cardGen.gridSizeY; y++) {
+			
+			CardScript NetherPos = myPlayer.cardGen.allCards [0, y].GetComponent<CardScript> ();
+			Instantiate (PowerUpStuff.s.NetherEffect, NetherPos.transform.position, Quaternion.identity);
+
 			for (int x = 0; x < myPlayer.cardGen.gridSizeX; x++) {
 
 				CardScript myCardS = myPlayer.cardGen.allCards [x, y].GetComponent<CardScript> ();
@@ -502,10 +507,10 @@ public class PowerUpDealer : MonoBehaviour {
 					
 					if (myCardS.cardType == 0) {
 						ScoreKeeper.s.AddScore (myPlayer.id, 5, 1);
-						Instantiate (myCardS.getEffect, myCardS.transform.position, myCardS.transform.rotation);
+						Instantiate (PowerUpStuff.s.NetherGetEffect, myCardS.transform.position - Vector3.forward, myCardS.transform.rotation);
 						//myCardS.cardType = 5;
 						//myCardS.cardType = 0;
-						yield return new WaitForSeconds(0.2f);
+						yield return new WaitForSeconds(0.005f);
 					} else {
 						myCardS.CoolRotate ();
 						myCardS.Invoke ("SelfClose", PowerUpStuff.s.NetherReRotateTime);
@@ -589,7 +594,7 @@ public class PowerUpDealer : MonoBehaviour {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
 
-					if(cardsToCheck[l].cardType >= 8){
+					/*if(cardsToCheck[l].cardType >= 8){
 
 						ScoreKeeper.s.AddScore(myPlayer.id, cardType + 7, 1);
 
@@ -598,7 +603,7 @@ public class PowerUpDealer : MonoBehaviour {
 
 						cardsToCheck[l].cardType = 0;
 						cardsToCheck[l].isSelected = false;
-					}
+					}*/
 
 					for (int k = 1; k < cardsToCheck.Length; k++) {
 						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
@@ -649,14 +654,14 @@ public class PowerUpDealer : MonoBehaviour {
 
 	}
 
-	IEnumerator CheckCardsCOROTquick(CardScript[] cardsToCheck, int cardType){
+	void CheckCardsCOROTquick(CardScript[] cardsToCheck, int cardType){
 
 		//check Cards
 		for (int l = 0; l < cardsToCheck.Length; l++) {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
 
-					if(cardsToCheck[l].cardType >= 8){
+					/*if(cardsToCheck[l].cardType >= 8){
 
 						ScoreKeeper.s.AddScore(myPlayer.id, cardType + 7, 1);
 
@@ -665,7 +670,7 @@ public class PowerUpDealer : MonoBehaviour {
 
 						cardsToCheck[l].cardType = 0;
 						cardsToCheck[l].isSelected = false;
-					}
+					}*/
 
 					for (int k = 1; k < cardsToCheck.Length; k++) {
 						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
@@ -698,8 +703,7 @@ public class PowerUpDealer : MonoBehaviour {
 				}
 			}
 		}
-
-		yield return new WaitForSeconds (0f);
+			
 
 		//Rotate unused cards
 		for (int l = 0; l < cardsToCheck.Length; l++) {

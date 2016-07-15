@@ -6,7 +6,7 @@ public class ScoreKeeper : MonoBehaviour {
 	//public Score playerBlue = new Score (0);
 	//public Score playerRed = new Score (1);
 
-	public Score[] players = new Score[2];
+	public Score[] players = new Score[4];
 
 	public static ScoreKeeper s;
 
@@ -15,11 +15,17 @@ public class ScoreKeeper : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		s = this;
-		panels = GameObject.FindObjectsOfType<ScorePanel> ();
 
 		for (int i = 0; i < players.Length; i++) {
 			players [i] = new Score ();
 		}
+	}
+
+	void Start(){
+		Invoke ("GetPanels", 0.1f);
+	}
+	void GetPanels(){
+		panels = GameObject.FindObjectsOfType<ScorePanel> ();
 	}
 	
 	// Update is called once per frame

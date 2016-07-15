@@ -18,7 +18,8 @@ public class CardGenerator : MonoBehaviour {
 
 
 		if (DataHandler.s != null) {
-
+			gridSizeX = DataHandler.gridSizeX;
+			gridSizeY = DataHandler.gridSizeY;
 		}
 
 		SetUpGrid ();

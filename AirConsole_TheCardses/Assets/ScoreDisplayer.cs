@@ -34,6 +34,15 @@ public class ScoreDisplayer : MonoBehaviour {
 	}
 
 	public void UpdateValues(){
-		text.text = ScoreKeeper.s.players[sp.playerid].Scores [cardType].ToString ();
+		if (cardType != 0) {
+			text.text = ScoreKeeper.s.players [sp.playerid].Scores [cardType].ToString ();
+		} else {
+			int score = 0;
+			for (int i = 1; i <= 7; i++) {
+				score += ScoreKeeper.s.players [sp.playerid].Scores [i];
+			}
+
+			text.text = score.ToString();
+		}
 	}
 }

@@ -9,16 +9,46 @@ public class PlayerAssigner : MonoBehaviour {
 
 	public GameObject PlayerRed;
 	public GameObject PlayerBlue;
-	public Text uiText;
+	//public Text uiText;
+	public Text gameMode;
+	public Text gameSetting;
 	public int scorePlayerRed = 0;
 	public int scorePlayerBlue = 0;
 
-	void Awake () {
+	bool isTimeAt = false;
+	int timeRemaining = 200;
+	float timeStartPoint = 0;
+
+	void Start () {
 		Debug.Log ("Started");
 		//AirConsole.instance.onMessage += OnMessage;
-		uiText.text = "NEED MORE PLAYERS";
-		AirConsole.instance.onConnect += OnConnect;
-		AirConsole.instance.onDisconnect += OnDisconnect;
+		//uiText.text = "";
+		//uiText.text = "NEED MORE PLAYERS";
+		//AirConsole.instance.onConnect += OnConnect;
+		//AirConsole.instance.onDisconnect += OnDisconnect;
+		if (DataHandler.s == null) {
+			gameMode.text = "Free Play";
+			gameSetting.text = "Testing!";
+		} else {
+			if (DataHandler.isTimeAttack) {
+				gameMode.text = "Time Attack";
+				timeRemaining = DataHandler.gameSetting;
+				gameSetting.text = ConverIntToTime(timeRemaining);
+				isTimeAt = true;
+				timeStartPoint = Time.realtimeSinceStartup;
+			} else {
+				gameMode.text = "First to Reach";
+				gameSetting.text = DataHandler.gameSetting.ToString();
+			}
+		}
+	}
+
+	void Update(){
+		if (isTimeAt) {
+			int timeSinceBegin = (int)(Time.realtimeSinceStartup - timeStartPoint);
+
+			gameSetting.text = ConverIntToTime (timeRemaining - timeSinceBegin);
+		}
 	}
 
 	/// <summary>
@@ -37,7 +67,7 @@ public class PlayerAssigner : MonoBehaviour {
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
 				StartGame ();
 			} else {
-				uiText.text = "NEED MORE PLAYERS";
+				//uiText.text = "NEED MORE PLAYERS";
 			}
 		}
 	}
@@ -54,7 +84,7 @@ public class PlayerAssigner : MonoBehaviour {
 			} else {
 				AirConsole.instance.SetActivePlayers (0);
 				ResetGame ();
-				uiText.text = "PLAYER LEFT - NEED MORE PLAYERS";
+				//uiText.text = "PLAYER LEFT - NEED MORE PLAYERS";
 			}
 		}
 	}
@@ -93,7 +123,7 @@ public class PlayerAssigner : MonoBehaviour {
 	public void UpdateScoreUI () {
 		// update text canvas
 		//uiText.text = scorePlayerBlue + ":" + scorePlayerRed;
-		uiText.text = "";
+		//uiText.text = "";
 	}
 
 	void FixedUpdate () {
@@ -119,4 +149,16 @@ public class PlayerAssigner : MonoBehaviour {
 			AirConsole.instance.onMessage -= OnMessage;
 		}
 	}*/
+
+	string ConverIntToTime (int time) {
+
+		int minuteCount = (int)(time / 60);
+		int secondCount = (int)(time - (minuteCount * 60));
+		if (secondCount < 10) {
+			return minuteCount.ToString () + ":0" + secondCount.ToString ();
+		} else {
+			return minuteCount.ToString () + ":" + secondCount.ToString ();
+		}
+
+	}
 }

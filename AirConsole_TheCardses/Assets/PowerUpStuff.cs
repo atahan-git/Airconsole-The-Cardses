@@ -22,6 +22,7 @@ public class PowerUpStuff : MonoBehaviour {
 	public GameObject FireEffect;
 	public float NetherReRotateTime = 0.5f;
 	public GameObject NetherEffect;
+	public GameObject NetherGetEffect;
 
 	// Use this for initialization
 	void Awake () {

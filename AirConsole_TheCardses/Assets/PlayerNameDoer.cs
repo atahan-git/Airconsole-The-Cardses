@@ -11,8 +11,10 @@ public class PlayerNameDoer : MonoBehaviour {
 	public Text text;
 
 	void Awake () {
+		text = GetComponentInChildren<Text> ();
 		AirConsole.instance.onConnect += UpdateName;
 		AirConsole.instance.onDisconnect += UpdateName;
+		InvokeRepeating ("CallIt", 0.5f, 0.5f);
 	}
 
 	// Use this for initialization
@@ -25,11 +27,18 @@ public class PlayerNameDoer : MonoBehaviour {
 	
 	}
 
+	void CallIt(){
+		UpdateName (-1);
+	}
+
 	void UpdateName(int rand){
 		try {
 			text.text = AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id));
 		} catch {
 			text.text = "NO PLAYER";
 		}
+
+		if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
+			text.text = "NO PLAYER";
 	}
 }

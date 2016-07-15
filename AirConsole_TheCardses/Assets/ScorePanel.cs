@@ -1,17 +1,27 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+using NDream.AirConsole;
+using Newtonsoft.Json.Linq;
 
 public class ScorePanel : MonoBehaviour {
 
 	public int playerid = 0;
-	public string playerName = "Blue";
+	public string playerName = "NO PLAYER";
 
 	public Text myName;
 	public Text score;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
+		if (DataHandler.s != null) {
+			UpdateName (1);
+		} else {
+			if (playerid == 2 || playerid == 3) {
+				Destroy (gameObject);
+			}
+		}
 		myName.text = playerName;
 		score.text = "0";
 	}
@@ -34,5 +44,18 @@ public class ScorePanel : MonoBehaviour {
 		}
 
 		return myScore;
+	}
+
+	void UpdateName(int rand){
+		try {
+			playerName = AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (playerid));
+			myName.text = playerName;
+		} catch {
+			myName.text = "NO PLAYER";
+			Destroy (gameObject);
+		}
+
+		if (playerName == "Guest 0")
+			Destroy (gameObject);
 	}
 }

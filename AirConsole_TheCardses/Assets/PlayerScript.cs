@@ -15,9 +15,9 @@ public class PlayerScript : MonoBehaviour {
 	public PowerUpDealer powerUp;
 
 	float animSpeed = 20f;
-	public float moveSpeed = 0.3f;//lower the better
+	//float moveSpeed = 0.3f;//lower the better
 	float CheckSpeed = 0.3f;
-	public float JoystickDeadZone = 0.5f;
+	//public float JoystickDeadZone = 0.5f;
 
 	[HideInInspector]
 	public CardScript[] rotatedCards = new CardScript[2];
@@ -29,6 +29,17 @@ public class PlayerScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		if (DataHandler.s == null) {
+			if (id == 2 || id == 3) {
+				Destroy (gameObject);
+				return;
+			}
+			AirConsole.instance.onMessage += OnMessage;
+			return;
+		}
+		if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
+			Destroy (gameObject);
+
 		AirConsole.instance.onMessage += OnMessage;
 	}
 	
@@ -53,7 +64,7 @@ public class PlayerScript : MonoBehaviour {
 
 
 
-		}else{
+		}else if(id == 1){
 			if(Input.GetKeyDown(KeyCode.UpArrow))
 				playerPos = AddVectors (playerPos, new Vector3 (0, 1, 0));
 			if(Input.GetKeyDown(KeyCode.DownArrow))
@@ -66,8 +77,9 @@ public class PlayerScript : MonoBehaviour {
 				PressSelect();
 		}
 
-		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
+		//playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
 		#endif
+		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
 	
 	}
 
@@ -138,10 +150,10 @@ public class PlayerScript : MonoBehaviour {
 
 		GameObject temp = (GameObject)Instantiate (playerEffect, myCardS.transform.position, myCardS.transform.rotation);
 
-		if(myCardS.cardType >= 8){
+		/*if(myCardS.cardType >= 8){
 			StartCoroutine (DragonCheck(myCardS, temp));
 			return;
-		}
+		}*/
 
 		if (playerEffectMem [0] == null) {
 			playerEffectMem [0] = temp;
@@ -159,6 +171,7 @@ public class PlayerScript : MonoBehaviour {
 			}
 		} else {
 			rotatedCards [1] = myCardS;
+			powerUp.CancelInvoke ("EarthPreCheck");
 			Invoke ("CheckCards", CheckSpeed);
 		}
 	}
@@ -188,13 +201,13 @@ public class PlayerScript : MonoBehaviour {
 				Destroy (gam.gameObject);
 		}
 
-		if (powerUp.isPoisonActive) {
-			powerUp.PoisonCheck(rotatedCards);
+		if (powerUp.isEarthActive) {
+			powerUp.EarthCheck();
 			return;
 		}
 
-		if (powerUp.isEarthActive) {
-			powerUp.EarthCheck();
+		if (powerUp.isPoisonActive) {
+			powerUp.PoisonCheck(rotatedCards);
 			return;
 		}
 

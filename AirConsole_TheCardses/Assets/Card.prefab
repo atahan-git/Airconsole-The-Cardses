@@ -273,9 +273,9 @@ MonoBehaviour:
   sRend: {fileID: 21254408}
   state: 0
   rotSpeed: 20
-  ReSelectTime: 5
+  ReSelectTime: 15
   _ReSelectTime: 5
-  dragonChance: 6
+  dragonChance: 5
   isSelected: 0
   getEffect: {fileID: 143876, guid: b9212b2297277784cbd7592b401eb9e4, type: 2}
 --- !u!212 &21254408

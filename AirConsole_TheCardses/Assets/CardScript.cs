@@ -42,7 +42,7 @@ public class CardScript : MonoBehaviour {
 	public float rotSpeed = 20f;
 	public float ReSelectTime = 5f;
 	[HideInInspector]
-	public float _ReSelectTime = 5f;
+	public float _ReSelectTime = 15f;
 	public int dragonChance = 7;
 
 	public bool isSelected = false;
