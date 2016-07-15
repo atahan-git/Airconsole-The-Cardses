@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using NDream.AirConsole;
 using Newtonsoft.Json.Linq;
+using System;
 
 public class PlayerAssigner : MonoBehaviour {
 
@@ -15,12 +16,17 @@ public class PlayerAssigner : MonoBehaviour {
 	public int scorePlayerRed = 0;
 	public int scorePlayerBlue = 0;
 
+	public GameObject winnerPanel;
+	public Text winnerText;
+
 	bool isTimeAt = false;
 	int timeRemaining = 200;
 	float timeStartPoint = 0;
 
 	void Start () {
 		Debug.Log ("Started");
+		winnerPanel.SetActive (false);
+
 		//AirConsole.instance.onMessage += OnMessage;
 		//uiText.text = "";
 		//uiText.text = "NEED MORE PLAYERS";
@@ -43,12 +49,56 @@ public class PlayerAssigner : MonoBehaviour {
 		}
 	}
 
-	void Update(){
+	void Update (){
 		if (isTimeAt) {
 			int timeSinceBegin = (int)(Time.realtimeSinceStartup - timeStartPoint);
 
 			gameSetting.text = ConverIntToTime (timeRemaining - timeSinceBegin);
+
+			if (timeRemaining - timeSinceBegin <= 0) {
+				EndGame ();
+			}
+		} else {
+			
+			for (int id = 0; id < 4; id++) {
+				int score = 0;
+				for (int i = 1; i <= 7; i++) {
+					score += ScoreKeeper.s.players [id].Scores [i];
+				}
+
+				if (score >= DataHandler.gameSetting) {
+					EndGame ();
+				}
+			}
 		}
+	}
+
+	void EndGame (){
+		PlayerScript[] myPlayers = GameObject.FindObjectsOfType<PlayerScript> ();
+
+		foreach (PlayerScript player in myPlayers) {
+			player.isActive = false;
+		}
+
+		winnerPanel.SetActive (true);
+	
+		int[] scores = new int[4];
+		for (int id = 0; id < 4; id++) {
+			int score = 0;
+			for (int i = 1; i <= 7; i++) {
+				score += ScoreKeeper.s.players [id].Scores [i];
+			}
+
+			scores [id] = score;
+		}
+			
+		//int[] one = { 5, 78, 68, 987, 5, 3, 6, 4 };
+		Array.Sort(scores);
+
+
+		//winnerText.text = "1. " + 
+
+		//display winner
 	}
 
 	/// <summary>

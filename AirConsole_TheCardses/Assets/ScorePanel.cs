@@ -19,7 +19,8 @@ public class ScorePanel : MonoBehaviour {
 			UpdateName (1);
 		} else {
 			if (playerid == 2 || playerid == 3) {
-				Destroy (gameObject);
+				//Destroy (gameObject);
+				myName.text = "NO PLAYER";
 			}
 		}
 		myName.text = playerName;
@@ -52,10 +53,12 @@ public class ScorePanel : MonoBehaviour {
 			myName.text = playerName;
 		} catch {
 			myName.text = "NO PLAYER";
-			Destroy (gameObject);
+			//Destroy (gameObject);
 		}
 
-		if (playerName == "Guest 0")
-			Destroy (gameObject);
+		if (playerName == "Guest 0") {
+			//Destroy (gameObject);
+			myName.text = "NO PLAYER";
+		}
 	}
 }

@@ -23,13 +23,13 @@ public class PowerUpDealer : MonoBehaviour {
 
 	public int[] DataTester = new int[5];
 
-	NestedIntArray[] lightCodes = new NestedIntArray[2];
+	NestedIntArray[] lightCodes  = new NestedIntArray[2];
 	NestedIntArray[] shadowCodes = new NestedIntArray[2];
-	NestedIntArray[] fireCodes = new NestedIntArray[2];
-	NestedIntArray[] earthCodes = new NestedIntArray[2];
+	NestedIntArray[] fireCodes   = new NestedIntArray[2];
+	NestedIntArray[] earthCodes  = new NestedIntArray[2];
 	NestedIntArray[] poisonCodes = new NestedIntArray[2];
 	NestedIntArray[] netherCodes = new NestedIntArray[2];
-	NestedIntArray[] iceCodes = new NestedIntArray[2];
+	NestedIntArray[] iceCodes    = new NestedIntArray[2];
 
 	//--------------------------------------------------------------------------
 
@@ -221,6 +221,7 @@ public class PowerUpDealer : MonoBehaviour {
 				Invoke ("undoShadowPowerUp", PowerUpStuff.s.shadowTime);
 				return;
 			}
+			n = 0;
 			isShadowActive = true;
 			myShadowEffect = (GameObject)Instantiate (PowerUpStuff.s.ShadowEffect, transform.position, transform.rotation);
 			myShadowEffect.transform.parent = transform;
@@ -261,6 +262,7 @@ public class PowerUpDealer : MonoBehaviour {
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [9] > 0) {
 			ScoreKeeper.s.AddScore(myPlayer.id, 9, -1);
 			StartCoroutine(FireActivate());
+			myPlayer.canSelect = false;
 		}
 	}
 
@@ -283,8 +285,15 @@ public class PowerUpDealer : MonoBehaviour {
 			cardsToCheck [i] = new CardScript ();
 		}*/
 
-		if (myPlayer.rotatedCards [0] != null)
+		if (myPlayer.rotatedCards [0] != null) {
 			cardsToCheck [10] = myPlayer.rotatedCards [0];
+			myPlayer.rotatedCards[0] = null;
+			foreach (GameObject gam in myPlayer.playerEffectMem) {
+				if (gam != null)
+					Destroy (gam.gameObject);
+			}
+		}
+		
 
 		int n = 0;
 		for (int i = leftLimit; i <= rightLimit; i++) {
@@ -390,6 +399,15 @@ public class PowerUpDealer : MonoBehaviour {
 			earthMem [0].isSelected = false;
 			earthMem [0] = null;
 
+			foreach (GameObject gam in earthEfMem) {
+				if (gam != null)
+					Destroy (gam.gameObject);
+			}
+			foreach (GameObject gam in myPlayer.playerEffectMem) {
+				if (gam != null)
+					Destroy (gam.gameObject);
+			}
+
 			ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
 
 		}
@@ -403,6 +421,10 @@ public class PowerUpDealer : MonoBehaviour {
 		earthMem [3] = myPlayer.rotatedCards [1];
 
 		foreach (GameObject gam in earthEfMem) {
+			if (gam != null)
+				Destroy (gam.gameObject);
+		}
+		foreach (GameObject gam in myPlayer.playerEffectMem) {
 			if (gam != null)
 				Destroy (gam.gameObject);
 		}
@@ -510,7 +532,7 @@ public class PowerUpDealer : MonoBehaviour {
 						Instantiate (PowerUpStuff.s.NetherGetEffect, myCardS.transform.position - Vector3.forward, myCardS.transform.rotation);
 						//myCardS.cardType = 5;
 						//myCardS.cardType = 0;
-						yield return new WaitForSeconds(0.005f);
+						yield return new WaitForSeconds(0.01f);
 					} else {
 						myCardS.CoolRotate ();
 						myCardS.Invoke ("SelfClose", PowerUpStuff.s.NetherReRotateTime);
@@ -519,6 +541,7 @@ public class PowerUpDealer : MonoBehaviour {
 				}
 				yield return new WaitForSeconds(0.005f);
 			}
+			yield return new WaitForSeconds(0.05f);
 		}
 
 	}
@@ -651,7 +674,7 @@ public class PowerUpDealer : MonoBehaviour {
 				}
 			}
 		}
-
+		myPlayer.canSelect = true;
 	}
 
 	void CheckCardsCOROTquick(CardScript[] cardsToCheck, int cardType){

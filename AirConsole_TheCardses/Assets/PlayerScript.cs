@@ -21,9 +21,12 @@ public class PlayerScript : MonoBehaviour {
 
 	[HideInInspector]
 	public CardScript[] rotatedCards = new CardScript[2];
-	GameObject[] playerEffectMem = new GameObject[2];
+	[HideInInspector]
+	public GameObject[] playerEffectMem = new GameObject[2];
 
+	public bool isActive = true;
 	public bool canMove = true;
+	public bool canSelect = true;
 
 	public GameObject playerEffect;
 
@@ -46,6 +49,7 @@ public class PlayerScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
 		transform.position = Vector3.Lerp(transform.position, cardGen.grid[(int)playerPos.x, (int)playerPos.y], animSpeed * Time.deltaTime);
 		#if UNITY_EDITOR
 		if(!canMove)
@@ -79,11 +83,13 @@ public class PlayerScript : MonoBehaviour {
 
 		//playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
 		#endif
-		playerPos = new Vector3 ((int)Mathf.Clamp (playerPos.x, 0, cardGen.gridSizeX - 1), (int)Mathf.Clamp (playerPos.y, 0, cardGen.gridSizeY -1), 0);
 	
 	}
 
 	void OnMessage (int device_id, JToken data) {
+		if (!isActive)
+			return;
+
 		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
 		if (active_player != -1) {
 			//print ("player is legit");
@@ -99,6 +105,9 @@ public class PlayerScript : MonoBehaviour {
 
 				} else if (data ["Select"] != null) {
 					if ((bool)data ["Select"] ["pressed"]) {
+
+						if (!canSelect)
+							return;
 
 						PressSelect ();
 					}
@@ -166,11 +175,13 @@ public class PlayerScript : MonoBehaviour {
 
 		if (rotatedCards [0] == null) {
 			rotatedCards [0] = myCardS;
+			Invoke ("UnSelectOneCard", 10f);
 			if (powerUp.isEarthActive) {
 				powerUp.Invoke("EarthPreCheck", CheckSpeed);
 			}
 		} else {
 			rotatedCards [1] = myCardS;
+			CancelInvoke ("UnSelectOneCard");
 			powerUp.CancelInvoke ("EarthPreCheck");
 			Invoke ("CheckCards", CheckSpeed);
 		}
@@ -239,6 +250,16 @@ public class PlayerScript : MonoBehaviour {
 		return new Vector3 (vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z);
 	}
 
+	void UnSelectOneCard(){
+		rotatedCards [0].RotateSelf ();
+		rotatedCards [0].isSelected = false;
+		rotatedCards [0] = null;
+
+		foreach (GameObject gam in playerEffectMem) {
+			if (gam != null)
+				Destroy (gam.gameObject);
+		}
+	}
 
 	//old move script
 	/*void Move(JToken data){
