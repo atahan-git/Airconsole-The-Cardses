@@ -60,5 +60,9 @@ public class ScorePanel : MonoBehaviour {
 			//Destroy (gameObject);
 			myName.text = "NO PLAYER";
 		}
+
+		if (playerid >= AirConsole.instance.GetActivePlayerDeviceIds.Count) {
+			myName.text = "NO PLAYER";
+		}
 	}
 }

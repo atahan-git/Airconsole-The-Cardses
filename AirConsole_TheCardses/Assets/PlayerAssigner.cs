@@ -92,11 +92,13 @@ public class PlayerAssigner : MonoBehaviour {
 		}
 
 		winnerPanel.SetActive (true);
-	
-		int[] scores = new int[4];
-		string[] names = new string[4];
 
-		for (int id = 0; id < 4; id++) {
+		int numberOfPlayers = AirConsole.instance.GetActivePlayerDeviceIds.Count;
+	
+		int[] scores = new int[numberOfPlayers];
+		string[] names = new string[numberOfPlayers];
+
+		for (int id = 0; id < numberOfPlayers; id++) {
 			int score = 0;
 			for (int i = 1; i <= 7; i++) {
 				score += ScoreKeeper.s.players [id].Scores [i];
@@ -107,13 +109,32 @@ public class PlayerAssigner : MonoBehaviour {
 		}
 			
 		//int[] one = { 5, 78, 68, 987, 5, 3, 6, 4 };
-		Array.Sort(scores);
+		for(int i = 0; i < scores.Length; i++){
+			for(int m = i + 1; m < scores.Length; m++){
+				if (scores [i] >= scores [m]) {
+					//thats the correct way
+				} else {
+					//wrong
+
+					int tempInt = scores [i];
+					string tempString = names [i];
+
+					scores [i] = scores [m];
+					names [i] = names [m];
+
+					scores [m] = tempInt;
+					names [m] = tempString;
+				}
+			}
+		}
 
 		//display winner
-		winnerScoreText.text = scores [0] + "\n" + scores [1] + "\n" + scores [2] + "\n" + scores [3];
-		winnerText.text = names [0] + "\n" + names [1] + "\n" + names [2] + "\n" + names [3];
-
-
+		winnerScoreText.text = "";
+		winnerText.text = "";
+		for (int i = 0; i < scores.Length; i++) {
+			winnerScoreText.text += scores [i] + "\n";
+			winnerText.text += "- " + names [i] + "\n";
+		}
 	}
 
 	public void BackToMenu(){

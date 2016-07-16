@@ -25,7 +25,7 @@ body {
 
 .left, .right {
   position: relative;
-  width: 43%;
+  width: 38%;
   overflow: hidden;
 }
 
@@ -38,11 +38,12 @@ body {
 .middle {
   position: relative;
   float: left;
-  width: 10%;
+  width: 20%;
 }
 
 .right {
   margin-right: 1%;
+  margin-left: 1%;
   float: right;
 }
 
@@ -63,11 +64,11 @@ body {
 
 .button-80 {
   position: absolute;
-  width: 80%;
-  height: 50%;
+  width: 95%;
+  height: 70%;
   left: 50%;
   margin-left: -40%;
-  font-size: 10px;
+  font-size: 15px;
 }
 
 .swipe-area {
@@ -81,10 +82,12 @@ body {
 .swipe-pattern-container {
   text-align: center;
   font-family: sans-serif;
-  display: inline-block;
+  /*display: inline-block;*/
   width: 100%;
   height: 100%;
-  max-width: 300px;
-  max-height: 300px;
+  /*max-width: 300px;
+  max-height: 300px;*/
   position: relative;
+  /*top: 22.5%;*/
+  top: 10%;
 }
