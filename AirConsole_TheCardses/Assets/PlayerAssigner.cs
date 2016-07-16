@@ -8,20 +8,25 @@ using System;
 
 public class PlayerAssigner : MonoBehaviour {
 
-	public GameObject PlayerRed;
-	public GameObject PlayerBlue;
+	//public GameObject PlayerRed;
+	//public GameObject PlayerBlue;
 	//public Text uiText;
 	public Text gameMode;
 	public Text gameSetting;
-	public int scorePlayerRed = 0;
-	public int scorePlayerBlue = 0;
+	//public int scorePlayerRed = 0;
+	//public int scorePlayerBlue = 0;
 
 	public GameObject winnerPanel;
 	public Text winnerText;
+	public Text winnerScoreText;
 
 	bool isTimeAt = false;
 	int timeRemaining = 200;
 	float timeStartPoint = 0;
+
+	bool isGameFinished = false;
+
+	public GameObject gameEndEffect;
 
 	void Start () {
 		Debug.Log ("Started");
@@ -50,6 +55,8 @@ public class PlayerAssigner : MonoBehaviour {
 	}
 
 	void Update (){
+		if (isGameFinished)
+			return;
 		if (isTimeAt) {
 			int timeSinceBegin = (int)(Time.realtimeSinceStartup - timeStartPoint);
 
@@ -74,6 +81,10 @@ public class PlayerAssigner : MonoBehaviour {
 	}
 
 	void EndGame (){
+		isGameFinished = true;
+
+		Instantiate (gameEndEffect, transform.position, transform.rotation);
+
 		PlayerScript[] myPlayers = GameObject.FindObjectsOfType<PlayerScript> ();
 
 		foreach (PlayerScript player in myPlayers) {
@@ -83,6 +94,8 @@ public class PlayerAssigner : MonoBehaviour {
 		winnerPanel.SetActive (true);
 	
 		int[] scores = new int[4];
+		string[] names = new string[4];
+
 		for (int id = 0; id < 4; id++) {
 			int score = 0;
 			for (int i = 1; i <= 7; i++) {
@@ -90,15 +103,21 @@ public class PlayerAssigner : MonoBehaviour {
 			}
 
 			scores [id] = score;
+			names [id] = AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id));
 		}
 			
 		//int[] one = { 5, 78, 68, 987, 5, 3, 6, 4 };
 		Array.Sort(scores);
 
-
-		//winnerText.text = "1. " + 
-
 		//display winner
+		winnerScoreText.text = scores [0] + "\n" + scores [1] + "\n" + scores [2] + "\n" + scores [3];
+		winnerText.text = names [0] + "\n" + names [1] + "\n" + names [2] + "\n" + names [3];
+
+
+	}
+
+	public void BackToMenu(){
+		UnityEngine.SceneManagement.SceneManager.LoadScene(0);
 	}
 
 	/// <summary>
@@ -115,7 +134,7 @@ public class PlayerAssigner : MonoBehaviour {
 		return;*/
 		if (AirConsole.instance.GetActivePlayerDeviceIds.Count == 0) {
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
-				StartGame ();
+				//StartGame ();
 			} else {
 				//uiText.text = "NEED MORE PLAYERS";
 			}
@@ -130,7 +149,7 @@ public class PlayerAssigner : MonoBehaviour {
 		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
 		if (active_player != -1) {
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
-				StartGame ();
+				//StartGame ();
 			} else {
 				AirConsole.instance.SetActivePlayers (0);
 				ResetGame ();
@@ -155,15 +174,6 @@ public class PlayerAssigner : MonoBehaviour {
 			}
 		}
 	}*/
-
-	void StartGame () {
-		print ("GameStarted");
-		AirConsole.instance.SetActivePlayers (2);
-		ResetGame ();
-		scorePlayerRed = 0;
-		scorePlayerBlue = 0;
-		UpdateScoreUI ();
-	}
 
 	void ResetGame () {
 
