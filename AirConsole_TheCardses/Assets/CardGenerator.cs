@@ -30,13 +30,13 @@ public class CardGenerator : MonoBehaviour {
 	
 	}
 
-	void SetUpGrid (){
+	public void SetUpGrid (){
 
 		//first clean old cards if they exist
 		DeleteCards ();
 
 		//give us a better centered position
-		transform.position = new Vector3 (transform.position.x - gridScaleX * ((float)gridSizeX/2f - 0.5f), transform.position.y - gridScaleY * ((float)gridSizeY/2f - 0.5f), transform.position.z);
+		Vector3 center = new Vector3 (transform.position.x - gridScaleX * ((float)gridSizeX/2f - 0.5f), transform.position.y - gridScaleY * ((float)gridSizeY/2f - 0.5f), transform.position.z);
 
 		//set up arrays according to the sizes that are given to us
 		grid = new Vector3[gridSizeX,gridSizeY];
@@ -47,7 +47,7 @@ public class CardGenerator : MonoBehaviour {
 			for (int m = 0; m < gridSizeY; m++) {
 
 				grid [i, m] = new Vector3();
-				grid [i, m] = transform.position + new Vector3 (i * gridScaleX, m * gridScaleY, 0);
+				grid [i, m] = center + new Vector3 (i * gridScaleX, m * gridScaleY, 0);
 
 			}
 		}

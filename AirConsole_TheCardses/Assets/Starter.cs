@@ -21,8 +21,8 @@ public class Starter : MonoBehaviour {
 	public void StartGame(){
 		if (AirConsole.instance.GetActivePlayerDeviceIds.Count >= 2) {
 
-			DataHandler.gridSizeX = (int)menu.sliderGridSizeX.value;
-			DataHandler.gridSizeY = (int)menu.sliderGridSizeY.value;
+			/*DataHandler.gridSizeX = (int)menu.sliderGridSizeX.value;
+			DataHandler.gridSizeY = (int)menu.sliderGridSizeY.value;*/
 
 			DataHandler.playerCount = AirConsole.instance.GetActivePlayerDeviceIds.Count;
 
