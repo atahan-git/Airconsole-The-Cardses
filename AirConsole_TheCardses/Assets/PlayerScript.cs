@@ -38,7 +38,15 @@ public class PlayerScript : MonoBehaviour {
 				return;
 			}
 			AirConsole.instance.onMessage += OnMessage;
+
+			if (CardGenerator.s.gridSizeY >= 5) {
+				float myScale = 0.8f;
+				transform.localScale = new Vector3 (myScale, myScale, myScale);
+			}
 			return;
+		} else if (DataHandler.gridSizeY >= 5) {
+			float myScale = 0.8f;
+			transform.localScale = new Vector3 (myScale, myScale, myScale);
 		}
 		if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
 			Destroy (gameObject);

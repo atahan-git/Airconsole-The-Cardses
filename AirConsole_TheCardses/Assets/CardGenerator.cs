@@ -3,6 +3,8 @@ using System.Collections;
 
 public class CardGenerator : MonoBehaviour {
 
+	public static CardGenerator s;
+
 	public Vector3[,] grid = new Vector3[4,4];
 	public GameObject[,] allCards = new GameObject[4,4];
 	public int gridSizeX = 4;
@@ -13,6 +15,12 @@ public class CardGenerator : MonoBehaviour {
 
 	public GameObject card;
 
+	public float scaleMultiplier = 1f;
+
+	void Awake(){
+		s = this;
+	}
+
 	// Use this for initialization
 	void Start () {
 
@@ -20,6 +28,12 @@ public class CardGenerator : MonoBehaviour {
 		if (DataHandler.s != null) {
 			gridSizeX = DataHandler.gridSizeX;
 			gridSizeY = DataHandler.gridSizeY;
+		}
+
+		if (gridSizeY >= 5) {
+			scaleMultiplier = 0.8f;
+			gridScaleX *= scaleMultiplier;
+			gridScaleY *= scaleMultiplier;
 		}
 
 		SetUpGrid ();
@@ -57,6 +71,8 @@ public class CardGenerator : MonoBehaviour {
 			for (int m = 0; m < gridSizeY; m++) {
 
 				GameObject myCard = (GameObject)Instantiate (card, grid [i, m], Quaternion.identity);
+				myCard.transform.parent = transform;
+				myCard.transform.localScale = new Vector3 (scaleMultiplier, scaleMultiplier, scaleMultiplier);
 				allCards [i, m] = myCard;
 
 			}

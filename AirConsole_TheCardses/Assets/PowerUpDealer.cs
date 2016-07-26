@@ -646,7 +646,7 @@ public class PowerUpDealer : MonoBehaviour {
 										cardsToCheck [l].isSelected = false;
 										cardsToCheck [l] = null;
 
-										ScoreKeeper.s.AddScore (myPlayer.id, cardType, 1);
+										ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
 										if(isPoisonActive)
 											ScoreKeeper.s.AddScore (poisonId, 6 /*myCardType*/, 1);
 
