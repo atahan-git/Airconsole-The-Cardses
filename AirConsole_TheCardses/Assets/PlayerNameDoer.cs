@@ -32,13 +32,16 @@ public class PlayerNameDoer : MonoBehaviour {
 	}
 
 	void UpdateName(int rand){
-		try {
-			text.text = AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id));
-		} catch {
-			text.text = "NO PLAYER";
-		}
+		//if (AirConsole.instance.GetControllerDeviceIds ().Count > id) {
+			try {
+				text.text = AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id));
+			} catch {
+				if (text != null)
+					text.text = "NO PLAYER";
+			}
 
-		if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
-			text.text = "NO PLAYER";
+			if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0" && text != null)
+				text.text = "NO PLAYER";
+		//}	
 	}
 }

@@ -31,9 +31,10 @@ public class CardGenerator : MonoBehaviour {
 		}
 
 		if (gridSizeY >= 5) {
-			scaleMultiplier = 0.8f;
-			gridScaleX *= scaleMultiplier;
-			gridScaleY *= scaleMultiplier;
+			scaleMultiplier = 0.9f;
+			gridScaleX *= 0.85f;
+			gridScaleY *= 0.85f;
+			transform.position = transform.position + new Vector3 (0,-0.15f,0);
 		}
 
 		SetUpGrid ();

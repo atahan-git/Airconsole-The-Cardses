@@ -14,7 +14,7 @@ public class OptionsMenuHandler : MonoBehaviour {
 	public Toggle timeAt;
 	public Toggle score;
 
-	public bool isTimeAttack = true;
+	public bool isTimeAttack = false;
 	bool check = false;
 
 	public InputField textModeSetMinute;
@@ -28,8 +28,8 @@ public class OptionsMenuHandler : MonoBehaviour {
 
 	void Awake () {
 
-		DataHandler.gridSizeX = (int)large.x;
-		DataHandler.gridSizeY = (int)large.y;
+		DataHandler.gridSizeX = (int)medium.x;
+		DataHandler.gridSizeY = (int)medium.y;
 
 	}
 
@@ -70,11 +70,11 @@ public class OptionsMenuHandler : MonoBehaviour {
 		if (!isTimeAttack) {
 			sliderModeSet.maxValue = 100;
 			sliderModeSet.minValue = 5;
-			sliderModeSet.value = 20;
+			sliderModeSet.value = 30;
 		} else {
 			sliderModeSet.maxValue = 300;
 			sliderModeSet.minValue = 10;
-			sliderModeSet.value = 120;
+			sliderModeSet.value = 180;
 		}
 
 		UpdateValues ();

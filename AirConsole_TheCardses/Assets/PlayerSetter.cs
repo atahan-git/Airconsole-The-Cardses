@@ -11,9 +11,10 @@ public class PlayerSetter : MonoBehaviour {
 
 	void Awake () {
 		//AirConsole.instance.onMessage += OnMessage;
+		if(uiText != null)
 		uiText.text = "NEED MORE PLAYERS";
 		AirConsole.instance.onConnect += OnConnect;
-		//AirConsole.instance.onDisconnect += OnDisconnect;
+		AirConsole.instance.onDisconnect += OnDisconnect;
 	}
 
 	/// <summary>
@@ -32,12 +33,13 @@ public class PlayerSetter : MonoBehaviour {
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
 				SetPlayers (2);
 			} else {
+				if(uiText != null)
 				uiText.text = "NEED MORE PLAYERS";
 			}
 		}
 
 		if (AirConsole.instance.GetActivePlayerDeviceIds.Count > 0) {
-			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
+			if (AirConsole.instance.GetControllerDeviceIds ().Count <= 4) {
 				SetPlayers (AirConsole.instance.GetControllerDeviceIds ().Count);
 			} else {
 			}
@@ -48,18 +50,23 @@ public class PlayerSetter : MonoBehaviour {
 	/// If the game is running and one of the active players leaves, we reset the game.
 	/// </summary>
 	/// <param name="device_id">The device_id that has left.</param>
-	/*void OnDisconnect (int device_id) {
-		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
-		if (active_player != -1) {
-			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
+	void OnDisconnect (int device_id) {
+		print ("connect: " + device_id);
+
+		if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
+			SetPlayers (2);
+		} else {
+			if(uiText != null)
+			uiText.text = "NEED MORE PLAYERS";
+		}
+
+		if (AirConsole.instance.GetActivePlayerDeviceIds.Count > 0) {
+			if (AirConsole.instance.GetControllerDeviceIds ().Count <= 4) {
 				SetPlayers (AirConsole.instance.GetControllerDeviceIds ().Count);
 			} else {
-				AirConsole.instance.SetActivePlayers (0);
-				ResetGame ();
-				uiText.text = "PLAYER LEFT - NEED MORE PLAYERS";
 			}
 		}
-	}*/
+	}
 
 	/// <summary>
 	/// We check which one of the active players has moved the paddle.
@@ -87,6 +94,7 @@ public class PlayerSetter : MonoBehaviour {
 	void SetPlayers(int number){
 		print ("set playter sd");
 		AirConsole.instance.SetActivePlayers (number);
+		if(uiText != null)
 		uiText.text = number + " players ready";
 	}
 

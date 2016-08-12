@@ -1351,7 +1351,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &900241448
 GameObject:
   m_ObjectHideFlags: 0
@@ -2371,7 +2371,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &1247703938
 GameObject:
   m_ObjectHideFlags: 0
@@ -3525,8 +3525,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e37d83ebce05ad74683fd3228dde9e7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  browserStartMode: 1
-  controllerHtml: {fileID: 4900000, guid: d3e3c697a8a81434492fc6e04f837cda, type: 3}
+  browserStartMode: 0
+  controllerHtml: {fileID: 4900000, guid: 58e760935b43f0c41ba3d45bb596003a, type: 3}
   autoScaleCanvas: 1
 --- !u!4 &1639384517
 Transform:
@@ -3896,7 +3896,7 @@ MonoBehaviour:
   cardGen: {fileID: 1292243598}
   timeAt: {fileID: 1192407958}
   score: {fileID: 862595564}
-  isTimeAttack: 1
+  isTimeAttack: 0
   textModeSetMinute: {fileID: 480512855}
   textModeSetSeconds: {fileID: 1385931299}
   textModeSetMiddle: {fileID: 1247703940}

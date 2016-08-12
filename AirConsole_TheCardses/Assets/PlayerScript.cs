@@ -33,23 +33,23 @@ public class PlayerScript : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		if (DataHandler.s == null) {
-			if (id == 2 || id == 3) {
+			/*if (id == 2 || id == 3) {
 				Destroy (gameObject);
 				return;
-			}
+			}*/
 			AirConsole.instance.onMessage += OnMessage;
 
 			if (CardGenerator.s.gridSizeY >= 5) {
-				float myScale = 0.8f;
+				float myScale = 0.85f;
 				transform.localScale = new Vector3 (myScale, myScale, myScale);
 			}
 			return;
 		} else if (DataHandler.gridSizeY >= 5) {
-			float myScale = 0.8f;
+			float myScale = 0.85f;
 			transform.localScale = new Vector3 (myScale, myScale, myScale);
 		}
-		if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
-			Destroy (gameObject);
+		/*if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
+			Destroy (gameObject);*/
 
 		AirConsole.instance.onMessage += OnMessage;
 	}

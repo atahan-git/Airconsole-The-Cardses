@@ -28,15 +28,20 @@ public class PlayerAssigner : MonoBehaviour {
 
 	public GameObject gameEndEffect;
 
+	public GameObject[] myPlayers = new GameObject[4];
+
 	void Start () {
 		Debug.Log ("Started");
 		winnerPanel.SetActive (false);
 
+		SetPlayers ();
+
 		//AirConsole.instance.onMessage += OnMessage;
 		//uiText.text = "";
 		//uiText.text = "NEED MORE PLAYERS";
-		//AirConsole.instance.onConnect += OnConnect;
-		//AirConsole.instance.onDisconnect += OnDisconnect;
+		AirConsole.instance.onConnect += OnConnect;
+		AirConsole.instance.onDisconnect += OnDisconnect;
+
 		if (DataHandler.s == null) {
 			gameMode.text = "Free Play";
 			gameSetting.text = "Testing!";
@@ -153,13 +158,31 @@ public class PlayerAssigner : MonoBehaviour {
 	void OnConnect (int device_id) {
 		/*AirConsole.instance.SetActivePlayers (1);
 		return;*/
-		if (AirConsole.instance.GetActivePlayerDeviceIds.Count == 0) {
-			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
-				//StartGame ();
-			} else {
-				//uiText.text = "NEED MORE PLAYERS";
-			}
+		//if (AirConsole.instance.GetActivePlayerDeviceIds.Count == 0) {
+		print("***Connect " + AirConsole.instance.GetControllerDeviceIds ().Count);
+		if (AirConsole.instance.GetControllerDeviceIds ().Count <= 4) {
+			SetPlayers ();
+		} else {
+			print ("there is already enough players");
+			//uiText.text = "NEED MORE PLAYERS";
 		}
+		//}
+	}
+
+	void SetPlayers (){
+		if (AirConsole.instance.GetControllerDeviceIds ().Count <= 4) {
+			AirConsole.instance.SetActivePlayers (AirConsole.instance.GetControllerDeviceIds ().Count);
+
+			foreach (GameObject gam in myPlayers) {
+				if (gam != null)
+					gam.SetActive (false);
+			}
+
+			for (int i = 0; i < AirConsole.instance.GetControllerDeviceIds ().Count; i++) {
+
+				myPlayers [i].SetActive (true);
+			}
+		} 
 	}
 
 	/// <summary>
@@ -167,16 +190,18 @@ public class PlayerAssigner : MonoBehaviour {
 	/// </summary>
 	/// <param name="device_id">The device_id that has left.</param>
 	void OnDisconnect (int device_id) {
-		int active_player = AirConsole.instance.ConvertDeviceIdToPlayerNumber (device_id);
-		if (active_player != -1) {
+
+		print("***Disconnect " + AirConsole.instance.GetControllerDeviceIds ().Count);
+
+
 			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
-				//StartGame ();
+				SetPlayers ();
 			} else {
-				AirConsole.instance.SetActivePlayers (0);
-				ResetGame ();
+				//AirConsole.instance.SetActivePlayers (0);
+				//ResetGame ();
 				//uiText.text = "PLAYER LEFT - NEED MORE PLAYERS";
 			}
-		}
+
 	}
 
 	/// <summary>

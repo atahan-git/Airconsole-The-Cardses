@@ -193,6 +193,7 @@ public class PowerUpDealer : MonoBehaviour {
 			isLightActive = true;
 			myLightEffect = (GameObject)Instantiate (PowerUpStuff.s.LightEffect, transform.position, transform.rotation);
 			myLightEffect.transform.parent = transform;
+			myLightEffect.transform.localScale = transform.localScale;
 			Invoke ("undoLightPowerUp", PowerUpStuff.s.lightTime);
 			DisableIce ();
 			DisablePoison ();
@@ -225,6 +226,7 @@ public class PowerUpDealer : MonoBehaviour {
 			isShadowActive = true;
 			myShadowEffect = (GameObject)Instantiate (PowerUpStuff.s.ShadowEffect, transform.position, transform.rotation);
 			myShadowEffect.transform.parent = transform;
+			myShadowEffect.transform.localScale = transform.localScale;
 			Invoke ("undoShadowPowerUp", PowerUpStuff.s.shadowTime);
 		}
 	}
@@ -339,6 +341,7 @@ public class PowerUpDealer : MonoBehaviour {
 			isEarthActive = true;
 			myEarthEffect = (GameObject)Instantiate (PowerUpStuff.s.EarthEffect, transform.position, transform.rotation);
 			myEarthEffect.transform.parent = transform;
+			myEarthEffect.transform.localScale = transform.localScale;
 			Invoke ("undoEarthPowerUp", PowerUpStuff.s.earthTime);
 		}
 	}
@@ -442,10 +445,12 @@ public class PowerUpDealer : MonoBehaviour {
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [13] > 0) {
 			ScoreKeeper.s.AddScore(myPlayer.id, 13, -1);
 			foreach(PowerUpDealer others in otherPlayers){
-				if (!others.isLightActive) {
-					others.DisablePoison ();
-					others.isPoisonActive = true;
-					others.poisonId = myPlayer.id;
+				if (others != null) {
+					if (!others.isLightActive) {
+						others.DisablePoison ();
+						others.isPoisonActive = true;
+						others.poisonId = myPlayer.id;
+					}
 				}
 			}
 		}
@@ -461,6 +466,7 @@ public class PowerUpDealer : MonoBehaviour {
 
 		myPosionEffect = (GameObject)Instantiate (PowerUpStuff.s.PoisonEffect, transform.position, transform.rotation);
 		myPosionEffect.transform.parent = transform;
+		myPosionEffect.transform.localScale = transform.localScale;
 
 		Invoke ("DisablePoison", PowerUpStuff.s.poisonTime);
 
@@ -555,9 +561,11 @@ public class PowerUpDealer : MonoBehaviour {
 		if (ScoreKeeper.s.players [myPlayer.id].Scores [10] > 0) {
 			ScoreKeeper.s.AddScore(myPlayer.id, 10, -1);
 			foreach(PowerUpDealer others in otherPlayers){
-				if (!others.isLightActive) {
-					others.DisableIce ();
-					others.isIceActive = true;
+				if (others != null) {
+					if (!others.isLightActive) {
+						others.DisableIce ();
+						others.isIceActive = true;
+					}
 				}
 			}
 		}
@@ -573,6 +581,7 @@ public class PowerUpDealer : MonoBehaviour {
 
 		myIceEffect = (GameObject)Instantiate (PowerUpStuff.s.IceEffect, transform.position, transform.rotation);
 		myIceEffect.transform.parent = transform;
+		myIceEffect.transform.localScale = transform.localScale;
 
 		Invoke ("DisableIce", PowerUpStuff.s.iceTime);
 
