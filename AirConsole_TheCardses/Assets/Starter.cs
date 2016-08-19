@@ -6,11 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class Starter : MonoBehaviour {
 
-	public OptionsMenuHandler menu;
+	public MenuHandler menu;
+	public static Starter s;
 
 	// Use this for initialization
 	void Start () {
-	
+		s = this;
 	}
 	
 	// Update is called once per frame
@@ -27,7 +28,7 @@ public class Starter : MonoBehaviour {
 			DataHandler.playerCount = AirConsole.instance.GetActivePlayerDeviceIds.Count;
 
 			DataHandler.isTimeAttack = menu.isTimeAttack;
-			DataHandler.gameSetting = (int)menu.sliderModeSet.value;
+			DataHandler.gameSetting = menu.modeValue;
 
 			SceneManager.LoadScene (1);
 		}

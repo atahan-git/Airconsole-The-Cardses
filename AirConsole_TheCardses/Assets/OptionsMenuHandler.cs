@@ -173,4 +173,5 @@ public class OptionsMenuHandler : MonoBehaviour {
 		cardGen.gridSizeY = (int)values.y;
 		cardGen.SetUpGrid ();
 	}
+
 }

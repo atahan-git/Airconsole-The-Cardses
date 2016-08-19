@@ -519,7 +519,7 @@ public class PowerUpDealer : MonoBehaviour {
 		}
 	}
 	//rotatedCards [0]._ReSelectTime = rotatedCards [0].ReSelectTime * PowerUpStuff.s.shadowMultiplier;
-
+	int netherCount = 0;
 	IEnumerator NetherActivate(){
 
 		for (int y = 0; y < myPlayer.cardGen.gridSizeY; y++) {
@@ -534,11 +534,18 @@ public class PowerUpDealer : MonoBehaviour {
 				if (!myCardS.isSelected) {
 					
 					if (myCardS.cardType == 0) {
-						ScoreKeeper.s.AddScore (myPlayer.id, 5, 1);
+						
+						netherCount++;
+						if (netherCount >= 2) {
+							ScoreKeeper.s.AddScore (myPlayer.id, 5, 1);
+							netherCount = 0;
+						}
+
 						Instantiate (PowerUpStuff.s.NetherGetEffect, myCardS.transform.position - Vector3.forward, myCardS.transform.rotation);
 						//myCardS.cardType = 5;
 						//myCardS.cardType = 0;
-						yield return new WaitForSeconds(0.01f);
+						yield return new WaitForSeconds (0.01f);
+						
 					} else {
 						myCardS.CoolRotate ();
 						myCardS.Invoke ("SelfClose", PowerUpStuff.s.NetherReRotateTime);
@@ -549,7 +556,7 @@ public class PowerUpDealer : MonoBehaviour {
 			}
 			yield return new WaitForSeconds(0.05f);
 		}
-
+		netherCount = 0;
 	}
 
 
@@ -657,7 +664,7 @@ public class PowerUpDealer : MonoBehaviour {
 
 										ScoreKeeper.s.AddScore (myPlayer.id, myCardType, 1);
 										if(isPoisonActive)
-											ScoreKeeper.s.AddScore (poisonId, 6 /*myCardType*/, 1);
+											ScoreKeeper.s.AddScore (poisonId, myCardType, 1);
 
 										yield return new WaitForSeconds (0.1f);
 									}

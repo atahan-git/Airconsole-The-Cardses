@@ -13,6 +13,7 @@ public class PlayerScript : MonoBehaviour {
 	public CardGenerator cardGen;
 	public PlayerAssigner master;
 	public PowerUpDealer powerUp;
+	public ComboDealer comboD;
 
 	float animSpeed = 20f;
 	//float moveSpeed = 0.3f;//lower the better
@@ -50,7 +51,7 @@ public class PlayerScript : MonoBehaviour {
 		}
 		/*if (AirConsole.instance.GetNickname (AirConsole.instance.ConvertPlayerNumberToDeviceId (id)) == "Guest 0")
 			Destroy (gameObject);*/
-
+		comboD = GetComponent<ComboDealer> ();
 		AirConsole.instance.onMessage += OnMessage;
 	}
 	
@@ -195,7 +196,7 @@ public class PlayerScript : MonoBehaviour {
 		}
 	}
 
-	IEnumerator DragonCheck(CardScript myCardS, GameObject temp){
+	/*IEnumerator DragonCheck(CardScript myCardS, GameObject temp){
 
 		Instantiate (myCardS.getEffect, myCardS.transform.position, myCardS.transform.rotation);
 
@@ -211,7 +212,7 @@ public class PlayerScript : MonoBehaviour {
 		myCardS.isSelected = false;
 
 		Destroy (temp);
-	}
+	}*/
 
 	void CheckCards(){
 
@@ -241,7 +242,8 @@ public class PlayerScript : MonoBehaviour {
 			rotatedCards [1].isSelected = false;
 			rotatedCards [1] = null;
 
-			ScoreKeeper.s.AddScore(id, myCardType, 1);
+			//ScoreKeeper.s.AddScore(id, myCardType, 1);
+			comboD.AddScoreWithComboCheck (id, myCardType);
 
 		} else {
 			rotatedCards [0].RotateSelf ();
