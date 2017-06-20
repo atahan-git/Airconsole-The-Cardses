@@ -33,18 +33,24 @@ public class PlayerAssigner : MonoBehaviour {
 	void Start () {
 		Debug.Log ("Started");
 		winnerPanel.SetActive (false);
-
+		try{
 		SetPlayers ();
-
+		}catch{
+		}
 		//AirConsole.instance.onMessage += OnMessage;
 		//uiText.text = "";
 		//uiText.text = "NEED MORE PLAYERS";
+		try{
 		AirConsole.instance.onConnect += OnConnect;
 		AirConsole.instance.onDisconnect += OnDisconnect;
+		}catch{
+		}
 
 		if (DataHandler.s == null) {
 			gameMode.text = "Free Play";
 			gameSetting.text = "Testing!";
+			isGameFinished = true;
+			print ("this called");
 		} else {
 			if (DataHandler.isTimeAttack) {
 				gameMode.text = "Time Attack";

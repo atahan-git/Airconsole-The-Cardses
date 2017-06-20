@@ -84,25 +84,25 @@ public class PowerUpDealer : MonoBehaviour {
 	void Update(){
 		#if UNITY_EDITOR
 		if(myPlayer.id == 0){
-		if (Input.GetKeyDown (KeyCode.L)) {
+			if (Input.GetKeyDown (KeyCode.Alpha7)) {
 			LightPowerUp ();
 		}
-		if (Input.GetKeyDown (KeyCode.O)) {
+			if (Input.GetKeyDown (KeyCode.Alpha6)) {
 			ShadowPowerUp ();
 		}
-		if (Input.GetKeyDown (KeyCode.F)) {
+			if (Input.GetKeyDown (KeyCode.Alpha3)) {
 			FirePowerUp ();
 		}
-		if (Input.GetKeyDown (KeyCode.E)) {
+			if (Input.GetKeyDown (KeyCode.Alpha1)) {
 			EarthPowerUp ();
 		}
-		if (Input.GetKeyDown (KeyCode.P)) {
+			if (Input.GetKeyDown (KeyCode.Alpha4)) {
 			PoisonPowerUp ();
 		}
-		if (Input.GetKeyDown (KeyCode.N)) {
+			if (Input.GetKeyDown (KeyCode.Alpha2)) {
 			NetherPowerUp ();
 		}
-		if (Input.GetKeyDown (KeyCode.I)) {
+			if (Input.GetKeyDown (KeyCode.Alpha5)) {
 			IcePowerUp ();
 		}
 		}
