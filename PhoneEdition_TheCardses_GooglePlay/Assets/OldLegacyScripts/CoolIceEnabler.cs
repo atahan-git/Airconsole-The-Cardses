@@ -3,6 +3,8 @@ using System.Collections;
 
 public class CoolIceEnabler : MonoBehaviour {
 
+	public static CoolIceEnabler s;
+
 	public bool isEnabled = false;
 
 	FrostEffect frost;
@@ -12,6 +14,7 @@ public class CoolIceEnabler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		s = this;
 		frost = GetComponent<FrostEffect> ();
 	}
 	

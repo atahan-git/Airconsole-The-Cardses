@@ -12,22 +12,6 @@ public class CardHandler : MonoBehaviour {
 	[HideInInspector]
 	public GameObject[,] allCards = new GameObject[4, 4];
 
-	public int gridSizeX = 10;
-	public int gridSizeY = 5;
-
-	public float gridScaleX = 1.49f;
-	public float gridScaleY = 1.99f;
-	public float scaleMultiplier = 1f;
-
-	[Space]
-
-	public GameObject card;
-
-	[Space]
-
-	public int dragonChance = 5;
-	public float cardReOpenTime = 15f;
-
 
 	void Awake(){
 		s = this;
@@ -36,15 +20,16 @@ public class CardHandler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
 		s = this;
 
 		SetUpGrid ();
 
-		GoogleAPI.s.logText.LogMessage("card grid done");
+		DataLogger.s.LogMessage("card grid done");
 		if (DataHandler.s.myPlayerIdentifier == DataHandler.p_blue) {
-			GoogleAPI.s.logText.LogMessage("initializing starting cards");
+			DataLogger.s.LogMessage("initializing starting cards");
 			InitializeFirstStartingCards ();
-			GoogleAPI.s.logText.LogMessage("Card intialized succesfully");
+			DataLogger.s.LogMessage("Card intialized succesfully");
 		}
 	}
 
@@ -58,30 +43,30 @@ public class CardHandler : MonoBehaviour {
 		DeleteCards ();
 
 		//give us a better centered position
-		Vector3 center = new Vector3 (transform.position.x - gridScaleX * ((float)gridSizeX/2f - 0.5f), transform.position.y - gridScaleY * ((float)gridSizeY/2f - 0.5f), transform.position.z);
+		Vector3 center = new Vector3 (transform.position.x - GS.a.gridScaleX * ((float)GS.a.gridSizeX / 2f - 0.5f), transform.position.y - GS.a.gridScaleY * ((float)GS.a.gridSizeY / 2f - 0.5f), transform.position.z);
 
 		//set up arrays according to the sizes that are given to us
-		grid = new Vector3[gridSizeX,gridSizeY];
-		allCards = new GameObject[gridSizeX,gridSizeY];
+		grid = new Vector3[GS.a.gridSizeX, GS.a.gridSizeY];
+		allCards = new GameObject[GS.a.gridSizeX, GS.a.gridSizeY];
 
 		//set up grid positions
-		for (int i = 0; i < gridSizeX; i++) {
-			for (int m = 0; m < gridSizeY; m++) {
+		for (int i = 0; i < GS.a.gridSizeX; i++) {
+			for (int m = 0; m < GS.a.gridSizeY; m++) {
 
-				grid [i, m] = new Vector3();
-				grid [i, m] = center + new Vector3 (i * gridScaleX, m * gridScaleY, 0);
+				grid [i, m] = new Vector3 ();
+				grid [i, m] = center + new Vector3 (i * GS.a.gridScaleX, m * GS.a.gridScaleY, 0);
 
 			}
 		}
 
 		//instantiate cards at correct positions
-		for (int i = 0; i < gridSizeX; i++) {
-			for (int m = 0; m < gridSizeY; m++) {
+		for (int i = 0; i < GS.a.gridSizeX; i++) {
+			for (int m = 0; m < GS.a.gridSizeY; m++) {
 
-				GameObject myCard = (GameObject)Instantiate (card, grid [i, m], Quaternion.identity);
+				GameObject myCard = (GameObject)Instantiate (GS.a.card, grid [i, m], Quaternion.identity);
 				myCard.transform.parent = transform;
 				myCard.transform.position = grid [i, m];
-				myCard.transform.localScale = new Vector3 (scaleMultiplier, scaleMultiplier, scaleMultiplier);
+				myCard.transform.localScale = new Vector3 (GS.a.scaleMultiplier, GS.a.scaleMultiplier, GS.a.scaleMultiplier);
 				allCards [i, m] = myCard;
 				myCard.GetComponent<IndividualCard> ().x = i;
 				myCard.GetComponent<IndividualCard> ().y = m;

@@ -4,15 +4,9 @@ using UnityEngine;
 
 public class PowerUp_Fire : MonoBehaviour {
 
-	public float activeTime = 10f;
-	public float checkSpeed = 0.5f;
-
-	[Space]
-
-	public GameObject selectPrefab;
 	public GameObject activatePrefab;
-	public GameObject scoreboardPrefab;
 	public GameObject indicatorPrefab;
+	public GameObject scoreboardPrefab;
 	GameObject indicator;
 
 	//-----------------------------------------------------------------------------------------------Main Functions
@@ -22,6 +16,7 @@ public class PowerUp_Fire : MonoBehaviour {
 		indicator = (GameObject)Instantiate (indicatorPrefab, ScoreBoardManager.s.indicatorParent);
 		indicator.transform.ResetTransformation ();
 		LocalPlayerController.s.PowerUpMode (true, Activate);
+		PowerUpManager.s.canActivatePowerUp = false;
 	}
 
 
@@ -35,9 +30,10 @@ public class PowerUp_Fire : MonoBehaviour {
 
 	public void Disable (){
 		SendAction (-1, -1, PowerUpManager.ActionType.Disable);
-		Destroy (indicator);
+		indicator.GetComponent<DisableAndDestroy> ().Engage ();
 		indicator = null;
 		LocalPlayerController.s.PowerUpMode (false, Activate);
+		PowerUpManager.s.canActivatePowerUp = true;
 		LocalPlayerController.s.canSelect = true;
 	}
 
@@ -100,31 +96,35 @@ public class PowerUp_Fire : MonoBehaviour {
 
 	//-----------------------------------------------------------------------------------------------Networking
 
-	GameObject[] network_scoreboard;
+	GameObject[] network_scoreboard = new GameObject[4];
 	public void ReceiveAction (int player, int x, int y, PowerUpManager.ActionType action) {
-		switch (action) {
-		case PowerUpManager.ActionType.Enable:
-			network_scoreboard [player] = (GameObject)Instantiate (scoreboardPrefab, ScoreBoardManager.s.scoreBoards [player].transform);
-			network_scoreboard [player].transform.ResetTransformation ();
-			break;
-		case PowerUpManager.ActionType.Activate:
-			IndividualCard myCard = CardHandler.s.allCards [x, y].GetComponent<IndividualCard>();
-			Instantiate (activatePrefab, myCard.transform.position, Quaternion.identity);
-			break;
-		case PowerUpManager.ActionType.SelectCard:
-			IndividualCard myCard2 = CardHandler.s.allCards [x, y].GetComponent<IndividualCard>();
-			myCard2.SelectCard ();
-			break;
-		case PowerUpManager.ActionType.Disable:
-			if (network_scoreboard [player] != null)
-				Destroy (network_scoreboard [player]);
-			network_scoreboard [player] = null;
-			break;
-		default:
 
-			break;
+		try {
+			switch (action) {
+			case PowerUpManager.ActionType.Enable:
+				network_scoreboard [player] = (GameObject)Instantiate (scoreboardPrefab, ScoreBoardManager.s.scoreBoards [player].transform);
+				network_scoreboard [player].transform.ResetTransformation ();
+				break;
+			case PowerUpManager.ActionType.Activate:
+				IndividualCard myCard = CardHandler.s.allCards [x, y].GetComponent<IndividualCard> ();
+				Instantiate (activatePrefab, myCard.transform.position, Quaternion.identity);
+				break;
+			case PowerUpManager.ActionType.SelectCard:
+				IndividualCard myCard2 = CardHandler.s.allCards [x, y].GetComponent<IndividualCard> ();
+				myCard2.SelectCard ();
+				break;
+			case PowerUpManager.ActionType.Disable:
+				if (network_scoreboard [player] != null)
+					network_scoreboard [player].GetComponent<DisableAndDestroy> ().Engage ();
+				network_scoreboard [player] = null;
+				break;
+			default:
+				DataLogger.s.LogMessage ("Unrecognized power up action PUF", true);
+				break;
+			}
+		} catch (System.Exception e) {
+			DataLogger.s.LogMessage (e.StackTrace + " -*- " + player.ToString() + " -*- " + x.ToString() + " -*- " + y.ToString() + " -*- " + action.ToString(), true);
 		}
-
 	}
 
 	void SendAction (int x, int y, PowerUpManager.ActionType action) {

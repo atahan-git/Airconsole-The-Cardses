@@ -20,24 +20,23 @@ public class DisableAndDestroy : MonoBehaviour {
 	}
 
 
-	public void Engage (string callerDEBUG) {
-		//if (isActiveAndEnabled) {
-		gameObject.name = Random.Range(245f, 332523f).ToString();
-		print(callerDEBUG + " - " + gameObject.name);
+	public void Engage () {
 
 		myParticles = GetComponentsInChildren<ParticleSystem> ();
 		myLights = GetComponentsInChildren<LightBeamsControlScript> ();
 
-			foreach (ParticleSystem sys in myParticles) {
+		foreach (ParticleSystem sys in myParticles) {
+			if (sys != null)
 				sys.Stop ();
-			}
+		}
 
-			foreach (LightBeamsControlScript lig in myLights) {
+		foreach (LightBeamsControlScript lig in myLights) {
+			if (lig != null)
 				lig.Stop ();
-			}
+		}
 
 
-			Destroy (gameObject, destroyTime);
-		//}
+		Destroy (gameObject, destroyTime);
+
 	}
 }

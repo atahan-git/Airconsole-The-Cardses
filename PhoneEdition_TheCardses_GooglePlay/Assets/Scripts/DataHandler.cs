@@ -8,13 +8,16 @@ public class DataHandler : MonoBehaviour {
 
 	public static DataHandler s;
 
+	[HideInInspector]
 	public char myPlayerIdentifier = 'B';
+	[HideInInspector]
 	public int myPlayerinteger = 0;
 
 	public const char p_blue = 'B';
 	public const char p_red = 'R';
 	public const char p_green = 'G';
 	public const char p_yellow = 'Y';
+	public const char p_NPC = 'X';
 
 
 	const char a_player = 'A';
@@ -37,15 +40,28 @@ public class DataHandler : MonoBehaviour {
 
 	}
 
+	void Update () {
+		if (logText == null) {
+			logText = DataLogger.s;
+		}
+		//logText.LogMessage(GetSelf ().ParticipantId.ToString();
+	}
+
 	void GetPlayerIdentity (){
 
 		if (GoogleAPI.s == null) {
 			GoogleAPI.s = GameObject.FindObjectOfType<GoogleAPI> ();
 		}
 
+		try{
 		myPlayerinteger = GoogleAPI.s.participants.IndexOf (GoogleAPI.s.GetSelf ());
-
+		}catch{
+			myPlayerinteger = 0;
+		}
+		try{
 		logText.LogMessage (myPlayerinteger.ToString());
+		}catch{
+		}
 
 		switch (myPlayerinteger) {
 		case 0:
@@ -100,16 +116,20 @@ public class DataHandler : MonoBehaviour {
 
 	public void SendCardType (int x, int y, int type){
 
-		//logText.LogMessage("Sending card type initiate");
+		try {
+			//logText.LogMessage("Sending card type initiate");
 
-		List<byte> toSend = new List<byte>();
-		toSend.AddRange(System.BitConverter.GetBytes (x));
-		toSend.AddRange(System.BitConverter.GetBytes (y));
-		toSend.AddRange(System.BitConverter.GetBytes (type));
+			List<byte> toSend = new List<byte> ();
+			toSend.AddRange (System.BitConverter.GetBytes (x));
+			toSend.AddRange (System.BitConverter.GetBytes (y));
+			toSend.AddRange (System.BitConverter.GetBytes (type));
 
 
-		//logText.LogMessage("Sending card type list made");
-		SendData (a_cardtype, toSend.ToArray ());
+			//logText.LogMessage("Sending card type list made");
+			SendData (a_cardtype, toSend.ToArray ());
+		} catch (Exception e) {
+			logText.LogMessage (e.StackTrace);
+		}
 	}
 
 	const char a_power_earth 	= 'E';	//PowerUpManager.PowerUpType.Earth;
@@ -178,21 +198,24 @@ public class DataHandler : MonoBehaviour {
 
 
 
-		SendData (a_player, toSend.ToArray ());
+		SendData (a_power, toSend.ToArray ());
 	}
 
 	public void SendScore (char player, int scoreType, int toAdd){
+		try {
+			List<byte> toSend = new List<byte> ();
+			toSend.Add ((byte)player);
+			toSend.AddRange (System.BitConverter.GetBytes (scoreType));
+			toSend.AddRange (System.BitConverter.GetBytes (toAdd));
 
-		List<byte> toSend = new List<byte>();
-		toSend.Add ((byte)player);
-		toSend.Add ((byte)scoreType);
-		toSend.Add ((byte)toAdd);
-
-		GoogleAPI.s.SendMessage (toSend.ToArray());
+			SendData (a_score, toSend.ToArray ());
+		} catch (Exception e) {
+			logText.LogMessage (e.StackTrace);
+		}
 	}
 
 	public void SendData (char command, byte[] data){
-
+		try{
 		List<byte> toSend = new List<byte>();
 		toSend.Add ((byte)command);
 		toSend.Add ((byte)myPlayerIdentifier);
@@ -201,7 +224,11 @@ public class DataHandler : MonoBehaviour {
 		}
 
 		//logText.LogMessage("Sending data " + command.ToString ());
+
 		GoogleAPI.s.SendMessage (toSend.ToArray());
+		}catch (Exception e){
+			DataLogger.s.LogMessage (e.StackTrace, true);
+		}
 	}
 
 
@@ -239,14 +266,15 @@ public class DataHandler : MonoBehaviour {
 			case a_score:
 				ReceiveScore (data);
 				break;
-			case a_def:
-				logText.LogMessage ("Unknown command",true);
+			default:
+				logText.LogMessage ("Unknown command " + myCommand.ToString (), true);
 				break;
 			}
 
 			//logText.LogMessage ("Data processing done " + myCommand.ToString ());
-		} catch {
-			logText.LogMessage ("Data processing failed " + myCommand.ToString (),true);
+		} catch (Exception e){
+			//logText.LogMessage ("Data processing failed " + myCommand.ToString (), true);
+			logText.LogMessage(e.StackTrace,true);
 		}
 	}
 
@@ -297,14 +325,35 @@ public class DataHandler : MonoBehaviour {
 	}
 
 	void ReceivePowerUpAction (byte[] data){
-		int player;
+		int player = 0;
+		char playerChar;
 		int x;
 		int y;
 		PowerUpManager.PowerUpType type;
 		PowerUpManager.ActionType action;
 
 
-		player = (char)data [1];
+		playerChar = (char)data [1];
+
+		switch (playerChar) {
+		case p_blue:
+			player = 0;
+			break;
+		case p_red:
+			player = 1;
+			break;
+		case p_green:
+			player = 2;
+			break;
+		case p_yellow:
+			player = 3;
+			break;
+		default:
+			DataLogger.s.LogMessage ("Unknown player char", true);
+			break;
+		}
+
+
 		x = System.BitConverter.ToInt32 (data, 2);
 		y = System.BitConverter.ToInt32 (data, 2 + 4);
 		char pType = (char)data [2 + 4 + 4];
@@ -365,9 +414,9 @@ public class DataHandler : MonoBehaviour {
 		int scoreType;
 		int toAdd;
 
-		player = (char)data [1];
-		scoreType = System.BitConverter.ToInt32 (data, 2);
-		toAdd = System.BitConverter.ToInt32 (data, 2 + 4);
+		player = (char)data [2];
+		scoreType = System.BitConverter.ToInt32 (data, 3);
+		toAdd = System.BitConverter.ToInt32 (data, 3 + 4);
 
 		ScoreBoardManager.s.ReceiveScore (player, scoreType, toAdd);
 	}

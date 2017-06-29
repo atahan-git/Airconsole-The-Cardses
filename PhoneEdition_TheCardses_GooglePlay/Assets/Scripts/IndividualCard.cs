@@ -26,11 +26,27 @@ public class IndividualCard : MonoBehaviour {
 	//14 = Shadow Dragon
 	//---------------------------
 
+
+	[HideInInspector]
 	public int x = -1;
+	[HideInInspector]
 	public int y = -1;
 
+	bool _isPoison = false;
+	public bool isPoison{
+		get{
+			return _isPoison;
+		}
+		set{
+			_isPoison = value;
+			if (_isPoison) {
+				cardType = 15;
+			} 
+			UpdateGraphics ();
+		}
+	}
+
 	int _cardType = 0;
-	[SerializeField]
 	public int cardType{
 		get{
 			return _cardType;
@@ -46,17 +62,16 @@ public class IndividualCard : MonoBehaviour {
 
 	[Space]
 
-	public Sprite[] cardSprites;
+
+	//public GameObject[] cardPrefabs = new GameObject[15];
 	public SpriteRenderer myRenderer;
 
-	[Space]
-
-	public GameObject getEffectPrefab;
 
 	// Use this for initialization
 	void Start () {
 		anim = GetComponent<Animator> ();
 		isSelectable = true;
+		//myRenderer.enabled = false;
 	}
 
 	void Update (){
@@ -72,8 +87,18 @@ public class IndividualCard : MonoBehaviour {
 		isSelectable = false;
 	}
 
+
 	[HideInInspector]
-	public GameObject selectedEffect;
+	public GameObject selectedEffect{
+		get{
+			return _selectedEffect;
+		}set{
+			DestroySelectedEfect ();
+			_selectedEffect = value;
+		}
+	}
+
+	GameObject _selectedEffect;
 
 	public void UnSelectCard () {
 		anim.SetBool ("isOpen", false);
@@ -87,18 +112,28 @@ public class IndividualCard : MonoBehaviour {
 		isSelectable = false;
 		DestroySelectedEfect ();
 		cardType = 0;
-		Invoke ("ReOpenCard", CardHandler.s.cardReOpenTime);
+		Invoke ("ReOpenCard", GS.a.cardReOpenTime);
 	}
 
 	public void ReOpenCard () {
+		DestroySelectedEfect ();
 		anim.SetBool ("isOpen", false);
 		Invoke ("RandomizeCardType", 0.5f);
 		Invoke ("ReEnableSelection", 0.5f);
 	}
 
 	public void NetherMatch (){
+		DestroySelectedEfect ();
 		isSelectable = false;
 		anim.SetTrigger ("JustRotate");
+		Invoke ("RandomizeCardType", 0.5f);
+		Invoke ("ReEnableSelection", 0.5f);
+	}
+
+	public void PoisonMatch (){
+		anim.SetBool ("isOpen", false);
+		_isPoison = false;
+		DestroySelectedEfect ();
 		Invoke ("RandomizeCardType", 0.5f);
 		Invoke ("ReEnableSelection", 0.5f);
 	}
@@ -106,13 +141,27 @@ public class IndividualCard : MonoBehaviour {
 	//-----------------------------------------Utility Functions
 
 	void DestroySelectedEfect (){
-		if (selectedEffect != null)
-			Destroy (selectedEffect);
-		selectedEffect = null;
+		try{
+			if (_selectedEffect != null)
+				Destroy (_selectedEffect);
+			_selectedEffect = null;
+		}catch(System.Exception e){
+			GoogleAPI.s.logText.LogMessage (e.StackTrace, true);
+		}
 	}
 
+	//GameObject activeOne;
 	void UpdateGraphics (){
-		myRenderer.sprite = cardSprites [cardType];
+		/*if (activeOne != null) {
+			Destroy (activeOne);
+			activeOne = null;
+		}
+		if (cardPrefabs [cardType] != null) {
+			activeOne = (GameObject)Instantiate (cardPrefabs [cardType], myRenderer.transform);
+			activeOne.transform.ResetTransformation ();
+		} else {*/
+		myRenderer.sprite = GS.a.cardSprites [cardType];
+		//}
 	}
 
 	public void UpdateCardType (int type) {
@@ -120,7 +169,7 @@ public class IndividualCard : MonoBehaviour {
 		CancelInvoke("RandomizeCardType");
 
 		if (DataHandler.s.myPlayerIdentifier == 'B') {
-			GoogleAPI.s.logText.LogMessage ("Sending card type to the other party");
+			DataLogger.s.LogMessage ("Master Card Type Send");
 			DataHandler.s.SendCardType (x, y, cardType);
 		}
 	}
@@ -130,7 +179,8 @@ public class IndividualCard : MonoBehaviour {
 	}
 
 	public void RandomizeCardType () {
-		int dragonChance = CardHandler.s.dragonChance;
+		int type = 0;
+		/*int dragonChance = CardHandler.s.dragonChance;
 		int type;
 
 		if (Random.Range (0, dragonChance) == 0) {
@@ -139,12 +189,14 @@ public class IndividualCard : MonoBehaviour {
 		} else {
 			//just a normal card
 			type = Random.Range(1,8);
-		}
+		}*/
+
+		type = RandFuncs.Sample (GS.a.cardChances);
 
 		UpdateCardType (type);
 	}
 
 	void SpawnGetEffect () {
-		Instantiate (getEffectPrefab, transform.position, Quaternion.identity);
+		Instantiate (GS.a.getEffectPrefab, transform.position, Quaternion.identity);
 	}
 }

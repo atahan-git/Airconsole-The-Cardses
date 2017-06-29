@@ -657,12 +657,12 @@ public class PowerUpDealer : NetworkBehaviour {
 		if (isLocalPlayer) {
 			foreach (GameObject gam in iceEffects) {
 				if (gam != null)
-					gam.GetComponent<DisableAndDestroy> ().Engage ("PupDealer");
+					gam.GetComponent<DisableAndDestroy> ().Engage ();
 			}
 		} else {
 			Camera.main.GetComponent<CoolIceEnabler> ().SetIceState (false);
 			GameObject.Find ("Local Player").GetComponent<PowerUpDealer>().isIceActive = false;
-			otherIce.GetComponent<DisableAndDestroy> ().Engage ("PupDealer");
+			otherIce.GetComponent<DisableAndDestroy> ().Engage ();
 		}
 	}
 
@@ -694,10 +694,10 @@ public class PowerUpDealer : NetworkBehaviour {
 	[ClientRpc]
 	void RpcRemoveActiveEffect () {
 		if (!isLocalPlayer) {
-			othersActiveEffect.GetComponent<DisableAndDestroy>().Engage("PupDealer");
+			othersActiveEffect.GetComponent<DisableAndDestroy>().Engage();
 			return;
 		}
-		activeEffect.GetComponent<DisableAndDestroy>().Engage("PupDealer");
+		activeEffect.GetComponent<DisableAndDestroy>().Engage();
 		myPlayer.isPowerUp = false;
 	}
 

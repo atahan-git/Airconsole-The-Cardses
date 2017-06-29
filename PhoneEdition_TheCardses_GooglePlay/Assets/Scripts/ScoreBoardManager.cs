@@ -12,10 +12,13 @@ public class ScoreBoardManager : MonoBehaviour {
 	int[] s_Green	= new int[15];	//2
 	int[] s_Yellow 	= new int[15];	//3
 
+	int[] s_NPC 	= new int[15];	//4 
+
+
 	public GameObject scoreboardPrefab;
 	public Transform scoreboardParent;
 	[HideInInspector]
-	public GameObject[] scoreBoards = new GameObject[4];
+	public GameObject[] scoreBoards = new GameObject[5];
 
 	public Transform indicatorParent;
 
@@ -24,13 +27,23 @@ public class ScoreBoardManager : MonoBehaviour {
 	void Start () {
 		s = this;
 
-		logText = GameObject.FindGameObjectWithTag ("LogText").GetComponent<DataLogger> ();
+		logText = DataLogger.s;
 		try{
+			scoreBoards = new GameObject[5];
 		SetUpPlayerScoreboardPanels ();
 		}catch{
 			logText.LogMessage ("Scoreboard creation failed",true);
+			print ("Scoreboard creation failed");
 		}
 		UpdatePanels ();
+	}
+
+	void Update (){
+		if (Input.touchCount > 2 || Input.GetKeyDown(KeyCode.H)) {
+			for (int i = 0; i <= 14; i++) {
+				AddScore (DataHandler.s.myPlayerIdentifier, i, 1);
+			}
+		}
 	}
 	
 	void SetUpPlayerScoreboardPanels(){
@@ -38,27 +51,44 @@ public class ScoreBoardManager : MonoBehaviour {
 
 		//logText.text = "Spawning panels";
 
+		print("spawning player panel");
+
 		scoreBoards [DataHandler.s.myPlayerinteger] = (GameObject)Instantiate (scoreboardPrefab, scoreboardParent);
 		scoreBoards [DataHandler.s.myPlayerinteger].transform.ResetTransformation ();
-		scoreBoards [DataHandler.s.myPlayerinteger].GetComponent<ScorePanel> ().SetValues (DataHandler.s.myPlayerinteger, GoogleAPI.s.GetSelf().DisplayName, true);
+		try {
+			scoreBoards [DataHandler.s.myPlayerinteger].GetComponent<ScorePanel> ().SetValues (DataHandler.s.myPlayerinteger, GoogleAPI.s.GetSelf ().DisplayName, true);
+		} catch {
+			scoreBoards [DataHandler.s.myPlayerinteger].GetComponent<ScorePanel> ().SetValues (DataHandler.s.myPlayerinteger, "PLayer", true);
+		}
 
-		logText.LogMessage("PLayer scoreboard succesfuly created");
+		logText.LogMessage ("PLayer scoreboard succesfuly created");
+		print("PLayer scoreboard succesfuly created");
 			
-		foreach (GooglePlayGames.BasicApi.Multiplayer.Participant part in GoogleAPI.s.participants) {
-			if (i != DataHandler.s.myPlayerinteger) {
-				logText.LogMessage("Creating " + i.ToString() + " scoreboard");
-				scoreBoards [i] = (GameObject)Instantiate (scoreboardPrefab, scoreboardParent);
-				scoreBoards [i].transform.ResetTransformation ();
-				scoreBoards [i].GetComponent<ScorePanel> ().SetValues (i, part.DisplayName,false);
-				logText.LogMessage(i.ToString() + " scoreboard created");
+		if (!GS.a.isNPC) {
+			print("fuck me");
+			foreach (GooglePlayGames.BasicApi.Multiplayer.Participant part in GoogleAPI.s.participants) {
+				if (i != DataHandler.s.myPlayerinteger) {
+					logText.LogMessage ("Creating " + i.ToString () + " scoreboard");
+					scoreBoards [i] = (GameObject)Instantiate (scoreboardPrefab, scoreboardParent);
+					scoreBoards [i].transform.ResetTransformation ();
+					scoreBoards [i].GetComponent<ScorePanel> ().SetValues (i, part.DisplayName, false);
+					logText.LogMessage (i.ToString () + " scoreboard created");
+				}
+				i++;
 			}
-			i++;
+		}
+		if (GS.a.isNPC) {
+			print ("Spawning npc scorboard panel");
+			scoreBoards[4] = (GameObject)Instantiate (GS.a.npcScoreboard, scoreboardParent);
+			scoreBoards[4].GetComponent<ScorePanel> ().SetValues (GS.a.npcId, GS.a.npcName,false);
+			logText.LogMessage(GS.a.npcName + " scoreboard created");
 		}
 	}
 
 	void UpdatePanels (){
-		int i = 0;
-		foreach (GameObject sBoard in scoreBoards) {
+		
+		for (int i = 0; i < 5; i++) {
+			GameObject sBoard = scoreBoards [i];
 			if (sBoard != null) {
 				int[] myArray = new int[15];
 				switch (i) {
@@ -74,24 +104,26 @@ public class ScoreBoardManager : MonoBehaviour {
 				case 3:
 					myArray = s_Yellow;
 					break;
+				case 4:
+					myArray = s_NPC;
+					break;
 				default:
-					GoogleAPI.s.logText.LogMessage ("Unknown player type, scorepanel", true);
+					DataLogger.s.LogMessage ("Unknown player type, scorepanel", true);
 					break;
 				}
 
 
 				try {
-					sBoard.gameObject.GetComponent<ScorePanel> ().UpdateScore (myArray [14]);
+					sBoard.gameObject.GetComponent<ScorePanel> ().UpdateScore (myArray [0]);
 				} catch {
 					try {
 						if (sBoard.GetComponent<ScorePanel> () == null)
-							GoogleAPI.s.logText.LogMessage ("cant find scorepanel script" + myArray [14].ToString (), true);
+							DataLogger.s.LogMessage ("cant find scorepanel script" + myArray [0].ToString (), true);
 					} catch {
-						GoogleAPI.s.logText.LogMessage ("what the fuck", true);
+						DataLogger.s.LogMessage ("what the fuck", true);
 					}
-					GoogleAPI.s.logText.LogMessage ("sth is wrong with the array " + myArray [14].ToString (), true);
+					DataLogger.s.LogMessage ("sth is wrong with the array " + myArray [0].ToString (), true);
 				}
-				i++;
 			}
 		}
 	}
@@ -112,40 +144,44 @@ public class ScoreBoardManager : MonoBehaviour {
 			case DataHandler.p_yellow:
 				myArray = s_Yellow;
 				break;
+			case DataHandler.p_NPC:
+				myArray = s_NPC;
+				break;
 			default:
-				GoogleAPI.s.logText.LogMessage ("Unknown player type", true);
+				DataLogger.s.LogMessage ("Unknown player type", true);
 				break;
 			}
 		} catch {
-			GoogleAPI.s.logText.LogMessage ("player identification error", true);
+			DataLogger.s.LogMessage ("player identification error", true);
 		}
 
 		myArray [scoreType] += toAdd;
 		try {
 			DataHandler.s.SendScore (player, scoreType, toAdd);
 		} catch {
-			GoogleAPI.s.logText.LogMessage ("sending score error", true);
+			DataLogger.s.LogMessage ("sending score error", true);
 		}
 
 		try {
-		if (scoreType > 7) {
-			PowerUpManager.s.PowerUpMenuEnable (scoreType, myArray [scoreType]);
-		} else {
-			myArray [14] += toAdd;
-		}
+			if (scoreType > 7) {
+				PowerUpManager.s.PowerUpMenuEnable (scoreType, myArray [scoreType]);
+			} else {
+				myArray [0] += toAdd;
+				myArray [0] = (int)Mathf.Clamp (myArray [0], 0, Mathf.Infinity);
+			}
 		} catch {
-			GoogleAPI.s.logText.LogMessage ("scoretype handling error " + scoreType, true);
+			DataLogger.s.LogMessage ("scoretype handling error " + scoreType, true);
 		}
 
-		try{
-		UpdatePanels ();
+		try {
+			UpdatePanels ();
 		} catch {
-			GoogleAPI.s.logText.LogMessage ("panel update error", true);
+			DataLogger.s.LogMessage ("panel update error", true);
 		}
 	}
 
 	public void ReceiveScore (char player, int scoreType, int toAdd){
-		GoogleAPI.s.logText.LogMessage ("score received");
+		DataLogger.s.LogMessage ("score received");
 		int[] myArray = new int[15];
 		try {
 			switch (player) {
@@ -162,17 +198,17 @@ public class ScoreBoardManager : MonoBehaviour {
 				myArray = s_Yellow;
 				break;
 			default:
-				GoogleAPI.s.logText.LogMessage ("SR Unknown player type", true);
+				DataLogger.s.LogMessage ("SR Unknown player type", true);
 				break;
 			}
 		} catch {
-			GoogleAPI.s.logText.LogMessage ("SR player identification error", true);
+			DataLogger.s.LogMessage ("SR player identification error", true);
 		}
 
 		myArray [scoreType] += toAdd;
 		if (scoreType > 7) {
 		} else {
-			myArray [15] += toAdd;
+			myArray [0] += toAdd;
 		}
 
 		UpdatePanels ();

@@ -4,29 +4,29 @@ using UnityEngine;
 
 public class PowerUp_Earth : MonoBehaviour {
 
-	public float activeTime = 10f;
-	public float checkSpeed = 0.5f;
 
-	[Space]
-
-	public GameObject selectPrefab;
 	public GameObject activatePrefab;
-	public GameObject scoreboardPrefab;
 	public GameObject indicatorPrefab;
+	public GameObject scoreboardPrefab;
+	public GameObject selectPrefab;
 	GameObject indicator;
 
 	//-----------------------------------------------------------------------------------------------Main Functions
 
 	public void Enable () {
 		SendAction (-1, -1, PowerUpManager.ActionType.Enable);
+
+		counter = 0;
+
 		indicator = (GameObject)Instantiate (indicatorPrefab, ScoreBoardManager.s.indicatorParent);
 		indicator.transform.ResetTransformation ();
 		LocalPlayerController.s.PowerUpMode (true, Activate);
-		Invoke ("Disable", activeTime);
+		PowerUpManager.s.canActivatePowerUp = false;
 	}
 
 	IndividualCard[] mem_Cards = new IndividualCard[4];
 	bool isChecking = false;
+	int counter = 0;
 	public void Activate (IndividualCard myCard) {
 
 		if (isChecking)
@@ -46,22 +46,26 @@ public class PowerUp_Earth : MonoBehaviour {
 		if (i == 0) {
 			if (mem_Cards [0].cardType == mem_Cards [1].cardType) {
 				isChecking = true;
-				Invoke ("CheckCards", checkSpeed);
+				Invoke ("CheckCards", GS.a.earth_checkSpeed);
 			} else {
 				LocalPlayerController.s.canSelect = true;
 			}
 		} else {
 			isChecking = true;
-			Invoke ("CheckCards", checkSpeed);
+			Invoke ("CheckCards", GS.a.earth_checkSpeed);
 		}
+
+		if (counter >= GS.a.earth_activeCount)
+			Disable ();
 	}
 
 	public void Disable (){
 		SendAction (-1, -1, PowerUpManager.ActionType.Disable);
 		CheckCards ();
-		Destroy (indicator);
+		indicator.GetComponent<DisableAndDestroy> ().Engage ();
 		indicator = null;
 		LocalPlayerController.s.PowerUpMode (false, Activate);
+		PowerUpManager.s.canActivatePowerUp = true;
 	}
 
 
@@ -87,13 +91,15 @@ public class PowerUp_Earth : MonoBehaviour {
 		CardChecker.s.CheckCards (mem_Cards, 1);
 		isChecking = false;
 		LocalPlayerController.s.canSelect = true;
+
+		counter++;
 	}
 
 
 
 	//-----------------------------------------------------------------------------------------------Networking
 
-	GameObject[] network_scoreboard;
+	GameObject[] network_scoreboard = new GameObject[4];
 	public void ReceiveAction (int player, int x, int y, PowerUpManager.ActionType action) {
 		switch (action) {
 		case PowerUpManager.ActionType.Enable:
@@ -107,11 +113,11 @@ public class PowerUp_Earth : MonoBehaviour {
 			break;
 		case PowerUpManager.ActionType.Disable:
 			if (network_scoreboard [player] != null)
-				Destroy (network_scoreboard [player]);
+				network_scoreboard [player].GetComponent<DisableAndDestroy> ().Engage ();
 			network_scoreboard [player] = null;
 			break;
 		default:
-
+			DataLogger.s.LogMessage ("Unrecognized power up action PUE", true);
 			break;
 		}
 

@@ -22,7 +22,8 @@ public class PowerUpManager : MonoBehaviour {
 	public GameObject[] powerUpMenuObjects = new GameObject[7];
 	public Transform menuParent;
 
-	public bool isPowerUpActive = false;
+	[HideInInspector]
+	public bool canActivatePowerUp = true;
 
 	// Use this for initialization
 	void Start () {
@@ -86,37 +87,47 @@ public class PowerUpManager : MonoBehaviour {
 			pShadows.Enable ();
 			break;
 		default:
+			DataLogger.s.LogMessage ("Unrecognized power up type PUM", true);
 			break;
 		}
 	}
 
 	public void PowerUpButton (int type){
-		switch (type) {
-		case 8:
-			PowerUpAction (PowerUpType.Earth, true);
-			break;
-		case 9:
-			PowerUpAction (PowerUpType.Fire, true);
-			break;
-		case 10:
-			PowerUpAction (PowerUpType.Ice, true);
-			break;
-		case 11:
-			PowerUpAction (PowerUpType.Light, true);
-			break;
-		case 12:
-			PowerUpAction (PowerUpType.Nether, true);
-			break;
-		case 13:
-			PowerUpAction (PowerUpType.Nether, true);
-			break;
-		case 14:
-			PowerUpAction (PowerUpType.Shadow, true);
-			break;
-		default:
-			break;
+		try {
+			if (LocalPlayerController.s.canSelect == false)
+				return;
+			if(canActivatePowerUp == false)
+				return;
+			switch (type) {
+			case 8:
+				PowerUpAction (PowerUpType.Earth, true);
+				break;
+			case 9:
+				PowerUpAction (PowerUpType.Fire, true);
+				break;
+			case 10:
+				PowerUpAction (PowerUpType.Ice, true);
+				break;
+			case 11:
+				PowerUpAction (PowerUpType.Light, true);
+				break;
+			case 12:
+				PowerUpAction (PowerUpType.Nether, true);
+				break;
+			case 13:
+				PowerUpAction (PowerUpType.Poison, true);
+				break;
+			case 14:
+				PowerUpAction (PowerUpType.Shadow, true);
+				break;
+			default:
+				DataLogger.s.LogMessage ("Unrecognized power up button PUM", true);
+				break;
+			}
+			ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, type, -1);
+		} catch (System.Exception e) {
+			DataLogger.s.LogMessage (e.StackTrace, true);
 		}
-		ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, type, -1);
 	}
 
 	public enum ActionType {Enable, Activate, SelectCard, Disable}
@@ -147,5 +158,9 @@ public class PowerUpManager : MonoBehaviour {
 		default:
 			break;
 		}
+	}
+
+	public void ChoosePoisonCard (IndividualCard myCard){
+		pPoison.ChoosePoisonCard (myCard);
 	}
 }

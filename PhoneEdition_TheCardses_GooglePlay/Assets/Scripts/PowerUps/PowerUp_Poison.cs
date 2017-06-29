@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class PowerUp_Poison : MonoBehaviour {
 
-	public float activeTime = 10f;
-	public float checkSpeed = 0.5f;
 
-	[Space]
-
-	public GameObject selectPrefab;
 	public GameObject activatePrefab;
-	public GameObject scoreboardPrefab;
 	public GameObject indicatorPrefab;
+	public GameObject scoreboardPrefab;
+	public GameObject selectPrefab;
+	public GameObject scoreLowerExplosionPrefab;
 	GameObject indicator;
 
 	//-----------------------------------------------------------------------------------------------Main Functions
@@ -22,78 +19,65 @@ public class PowerUp_Poison : MonoBehaviour {
 		indicator = (GameObject)Instantiate (indicatorPrefab, ScoreBoardManager.s.indicatorParent);
 		indicator.transform.ResetTransformation ();
 		LocalPlayerController.s.PowerUpMode (true, Activate);
-		Invoke ("Disable", activeTime);
+		PowerUpManager.s.canActivatePowerUp = false;
 	}
 		
-	IndividualCard[] mem_Cards = new IndividualCard[4];
-	bool isChecking = false;
 	public void Activate (IndividualCard myCard) {
-
-		if (isChecking)
-			return;
-
-		//check if we have done the first round
-		int i = 0;
-		if (mem_Cards [0] != null)
-			i = 2;
-
-		//select the card the player chose
-		SelectCard (myCard, i);
-
-		//select a random card
-		SelectRandomCard (i + 1);
-
-		if (i == 0) {
-			if (mem_Cards [0].cardType == mem_Cards [1].cardType) {
-				isChecking = true;
-				Invoke ("CheckCards", checkSpeed);
-			} else {
-				LocalPlayerController.s.canSelect = true;
-			}
-		} else {
-			isChecking = true;
-			Invoke ("CheckCards", checkSpeed);
-		}
+		StartCoroutine (_Activate (myCard));
 	}
 
-	public void Disable (){
-		SendAction (-1, -1, PowerUpManager.ActionType.Disable);
-		CheckCards ();
-		Destroy (indicator);
+	IEnumerator _Activate (IndividualCard myCard){
+		SendAction (myCard.x, myCard.y, PowerUpManager.ActionType.Activate);
+
+		myCard.SelectCard ();
+		myCard.cardType = 15;
+		myCard.isPoison = true;
+		myCard.selectedEffect = (GameObject)Instantiate (selectPrefab, myCard.transform.position, Quaternion.identity);
+
+
+		indicator.GetComponent<DisableAndDestroy> ().Engage ();
 		indicator = null;
 		LocalPlayerController.s.PowerUpMode (false, Activate);
-	}
+		PowerUpManager.s.canActivatePowerUp = true;
 
+		yield return new WaitForSeconds (GS.a.poison_activeTime);
 
-	//-----------------------------------------------------------------------------------------------Helper Functions
-
-	void SelectRandomCard (int i){
-		IndividualCard randomCard;
-		do {
-			randomCard = CardHandler.s.allCards [Random.Range (0, CardHandler.s.allCards.GetLength (0)), Random.Range (0, CardHandler.s.allCards.GetLength (1))].GetComponent<IndividualCard>();
-		} while(randomCard.cardType == 0 || randomCard.isSelectable == false);
-		SelectCard (randomCard, i);
-	}
-
-	void SelectCard (IndividualCard myCard, int i){
-		myCard.SelectCard ();
-		mem_Cards[i] = myCard;
-		mem_Cards[i].selectedEffect = (GameObject)Instantiate (selectPrefab, myCard.transform.position, Quaternion.identity);
-		Instantiate (activatePrefab, myCard.transform.position, Quaternion.identity);
-		SendAction (myCard.x, myCard.y, PowerUpManager.ActionType.Activate);
-	}
-
-	void CheckCards () {
-		CardChecker.s.CheckCards (mem_Cards, 1);
-		isChecking = false;
 		LocalPlayerController.s.canSelect = true;
+		myCard.UnSelectCard ();
+	}
+		
+
+	public void ChoosePoisonCard (IndividualCard myCard){
+		SendAction (myCard.x, myCard.y, PowerUpManager.ActionType.Disable);
+		StartCoroutine (_ChoosePoisonCard (myCard));
+	}
+		
+	IEnumerator _ChoosePoisonCard (IndividualCard myCard){
+		myCard.SelectCard ();
+		Instantiate (activatePrefab, myCard.transform.position, Quaternion.identity);
+		myCard.selectedEffect = (GameObject)Instantiate (selectPrefab, myCard.transform.position, Quaternion.identity);
+
+		yield return new WaitForSeconds (GS.a.poison_checkSpeed /4f);
+
+		for (int i = 0; i < GS.a.poison_damage; i++) {
+			ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, 0, -1);
+			GameObject exp = (GameObject)Instantiate (scoreLowerExplosionPrefab, ScoreBoardManager.s.scoreBoards [DataHandler.s.myPlayerinteger].transform);
+			exp.transform.ResetTransformation ();
+
+			yield return new WaitForSeconds ((GS.a.poison_checkSpeed / 2f) / (float)GS.a.poison_damage);
+		}
+
+		yield return new WaitForSeconds (GS.a.poison_checkSpeed /4f);
+
+		LocalPlayerController.s.canSelect = true;
+		myCard.PoisonMatch ();
 	}
 
 
 
 	//-----------------------------------------------------------------------------------------------Networking
 
-	GameObject[] network_scoreboard;
+	GameObject[] network_scoreboard = new GameObject[4];
 	public void ReceiveAction (int player, int x, int y, PowerUpManager.ActionType action) {
 		switch (action) {
 		case PowerUpManager.ActionType.Enable:
@@ -101,19 +85,53 @@ public class PowerUp_Poison : MonoBehaviour {
 			network_scoreboard [player].transform.ResetTransformation ();
 			break;
 		case PowerUpManager.ActionType.Activate:
-			IndividualCard myCard = CardHandler.s.allCards [x, y].GetComponent<IndividualCard>();
-			myCard.SelectCard ();
-			myCard.selectedEffect = (GameObject)Instantiate (selectPrefab, myCard.transform.position, Quaternion.identity);
+			IndividualCard myCard = CardHandler.s.allCards [x, y].GetComponent<IndividualCard> ();
+			StartCoroutine (NetworkActivate (player, myCard));
 			break;
 		case PowerUpManager.ActionType.Disable:
-			if (network_scoreboard [player] != null)
-				Destroy (network_scoreboard [player]);
-			network_scoreboard [player] = null;
+			IndividualCard myCard2 = CardHandler.s.allCards [x, y].GetComponent<IndividualCard> ();
+			StartCoroutine (NetworkDisable (player, myCard2));
 			break;
 		default:
-
+			DataLogger.s.LogMessage ("Unrecognized power up action PUP", true);
 			break;
 		}
+
+	}
+
+	IEnumerator NetworkActivate (int player, IndividualCard myCard){
+		myCard.SelectCard ();
+		myCard.cardType = 15;
+		myCard.isPoison = true;
+		myCard.selectedEffect = (GameObject)Instantiate (selectPrefab, myCard.transform.position, Quaternion.identity);
+
+		yield return new WaitForSeconds (GS.a.poison_activeTime);
+
+
+		if (network_scoreboard [player] != null)
+			network_scoreboard [player].GetComponent<DisableAndDestroy> ().Engage ();
+		network_scoreboard [player] = null;
+
+		myCard.UnSelectCard ();
+	}
+
+	IEnumerator NetworkDisable (int player, IndividualCard myCard){
+		myCard.SelectCard ();
+		Instantiate (activatePrefab, myCard.transform.position, Quaternion.identity);
+		myCard.selectedEffect = (GameObject)Instantiate (selectPrefab, myCard.transform.position, Quaternion.identity);
+
+		yield return new WaitForSeconds (GS.a.poison_checkSpeed /4f);
+
+		for (int i = 0; i < GS.a.poison_damage; i++) {
+			GameObject exp = (GameObject)Instantiate (scoreLowerExplosionPrefab, ScoreBoardManager.s.scoreBoards [player].transform);
+			exp.transform.ResetTransformation ();
+
+			yield return new WaitForSeconds ((GS.a.poison_checkSpeed / 2f) / (float)GS.a.poison_damage);
+		}
+
+		yield return new WaitForSeconds (GS.a.poison_checkSpeed / 4f);
+
+		myCard.PoisonMatch ();
 
 	}
 

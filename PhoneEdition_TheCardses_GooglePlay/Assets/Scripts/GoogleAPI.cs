@@ -19,47 +19,51 @@ public class GoogleAPI : MonoBehaviour, RealTimeMultiplayerListener {
 
 	public DataLogger logText;
 
-	//public MPSecondPlayer secP;
+	public bool canPlay = false;
 
 	// Use this for initialization
 	void Awake () 
 	{
-		logText = GameObject.FindGameObjectWithTag ("LogText").GetComponent<DataLogger>();
 		if (s != null) {
-			Destroy (this);
+			Destroy (this.gameObject);
 			return;
+		} else {
+			s = this;
 		}
+
+		Application.targetFrameRate = 30;
+
 		DontDestroyOnLoad (this.gameObject);
-		s = this;
 	}
 
 	void Start () 
 	{	
-		logText = GameObject.FindGameObjectWithTag ("LogText").GetComponent<DataLogger>();
+		logText = DataLogger.s;
 
 		//RTClient = PlayGamesPlatform.Instance.RealTime;
 		//lobbyGUI.SetActive (false);
 		//ChangePlayerCount (0);
 
 		logText.LogMessage("Initialising");
-
+		try{
 		PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
-		logText.LogMessage("config set");
 
 		PlayGamesPlatform.InitializeInstance(config);
-		logText.LogMessage("Initialized instance");
 		PlayGamesPlatform.DebugLogEnabled = true;
 		//logText.LogMessage("debug enabled");
 		PlayGamesPlatform.Activate();
-		logText.LogMessage("Activated");
 
 		//GameObject.FindObjectOfType<MPMenu> ().GetComponent<MPMenu> ().GirisYapildiMi (Social.localUser.authenticated);
-		if (!PlayGamesPlatform.Instance.localUser.authenticated) {
-			Login ();
+		}catch{
+			logText.LogMessage ("Initialization Failure, PLease Restart the Game");
 		}
-
-
 		logText.LogMessage("Initialization Successful");
+
+		if (Application.internetReachability != NetworkReachability.NotReachable) {
+			if (!PlayGamesPlatform.Instance.localUser.authenticated) {
+				Login ();
+			}
+		}
 	}
 
 
@@ -79,25 +83,31 @@ public class GoogleAPI : MonoBehaviour, RealTimeMultiplayerListener {
 		return PlayGamesPlatform.Instance.RealTime.GetSelf ();
 	}
 
-	public void Login ()
-	{
+	int n= 1;
+	public void Login () {
 		
-		PlayGamesPlatform.Instance.Authenticate((bool success) => 
-			{
-				if(success)
-				{
-					logText.LogMessage("Login Successful");
+		PlayGamesPlatform.Instance.Authenticate ((bool success) => {
+			if (success) {
+				logText.LogMessage ("Login Successful");
+				canPlay = true;
+				MenuManager.s.UpdateMenu ();
+			} else {
+				if (Application.internetReachability != NetworkReachability.NotReachable) {
+					logText.LogMessage ("Login attempt " + n.ToString ());
+					n++;
+					//Invoke ("Login", 0.5f);
+				} else {
+					logText.LogMessage ("No Internet Access");
 				}
-				else
-				{
-					logText.LogMessage("Login Failure");
-					//Login();
-				}
-			},false);
+				isOnline = false;
+			}
+		}, false);
 	}
 
 	public void GetQuickMatch ()
 	{
+		isOnline = true;
+		canPlay = false;
 		logText.LogMessage("Initiating Search");
 		//PlayGamesPlatform.Instance.RealTime.ShowWaitingRoomUI ();
 		//sInstance = new MultiPlayerConnect();
@@ -113,7 +123,7 @@ public class GoogleAPI : MonoBehaviour, RealTimeMultiplayerListener {
 
 	void Update () {
 		if (logText == null) {
-			logText = GameObject.FindGameObjectWithTag ("LogText").GetComponent<DataLogger>();
+			logText = DataLogger.s;
 		}
 		//logText.LogMessage(GetSelf ().ParticipantId.ToString();
 	}
@@ -124,7 +134,7 @@ public class GoogleAPI : MonoBehaviour, RealTimeMultiplayerListener {
 		{
 			logText.LogMessage("Room Connection Successful");
 			participants = GetParticipants ();
-			SceneManager.LoadScene (1);
+			SceneMaster.s.LoadMultiplayer ();
 		} else 
 		{
 			logText.LogMessage("Room Connection Failure");
@@ -176,7 +186,7 @@ public class GoogleAPI : MonoBehaviour, RealTimeMultiplayerListener {
 
 		// (do NOT call PlayGamesPlatform.Instance.RealTime.LeaveRoom() here --
 		// you have already left the room!)
-		SceneManager.LoadScene (0);
+		SceneMaster.s.LoadMenu();
 	}
 
 
@@ -195,12 +205,17 @@ public class GoogleAPI : MonoBehaviour, RealTimeMultiplayerListener {
 		}
 	}
 
+	public bool isOnline = false;
 	public void SendMessage (byte[] data){
-		try{
-			PlayGamesPlatform.Instance.RealTime.SendMessageToAll (true, data);
-			logText.LogMessage("Data send " + ((char)data [0]).ToString());
-		}catch{
-			logText.LogMessage("Data failed to send " + ((char)data [0]).ToString ());
+		if (isOnline) {
+			try {
+				PlayGamesPlatform.Instance.RealTime.SendMessageToAll (true, data);
+				logText.LogMessage ("Data send " + ((char)data [0]).ToString ());
+			} catch (System.Exception e) {
+				logText.LogMessage ("Data failed to send " + ((char)data [0]).ToString () + " - " + e.StackTrace);
+			}
+		} else {
+			logText.LogMessage ("We are offline",true);
 		}
 	}
 }

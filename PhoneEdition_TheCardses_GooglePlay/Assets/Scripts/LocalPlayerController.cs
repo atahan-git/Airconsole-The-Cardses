@@ -6,13 +6,12 @@ public class LocalPlayerController : MonoBehaviour {
 
 	public static LocalPlayerController s;
 
-	public float checkSpeed = 0.35f;
-
 
 	CardHandler cardHand;
 	PowerUpManager powerUp;
 
 
+	[HideInInspector]
 	public bool canSelect = true;
 	bool isPowerUp = false;
 
@@ -24,19 +23,19 @@ public class LocalPlayerController : MonoBehaviour {
 
 		switch (DataHandler.s.myPlayerIdentifier) {
 		case DataHandler.p_blue:
-			myEffect = EnemyPlayerHandler.s.blueCardSelect;
+			myEffect = GS.a.blueCardSelect;
 			break;
 		case DataHandler.p_red:
-			myEffect = EnemyPlayerHandler.s.redCardSelect;
+			myEffect = GS.a.redCardSelect;
 			break;
 		case DataHandler.p_green:
-			myEffect = EnemyPlayerHandler.s.greenCardSelect;
+			myEffect = GS.a.greenCardSelect;
 			break;
 		case DataHandler.p_yellow:
-			myEffect = EnemyPlayerHandler.s.yellowCardSelect;
+			myEffect = GS.a.yellowCardSelect;
 			break;
 		default:
-			myEffect = EnemyPlayerHandler.s.blueCardSelect;
+			myEffect = GS.a.blueCardSelect;
 			break;
 		}
 
@@ -44,6 +43,7 @@ public class LocalPlayerController : MonoBehaviour {
 
 
 	void Update () {
+		try{
 		if (Input.GetMouseButtonDown (0) && canSelect /*&& Input.mousePosition.x > Screen.width / 6.6f*/) {
 
 			RaycastHit hit = new RaycastHit ();
@@ -67,10 +67,25 @@ public class LocalPlayerController : MonoBehaviour {
 				}
 			}
 		}
+		}catch(System.Exception e){
+			DataLogger.s.LogMessage (e.StackTrace, true);
+		}
 	}
 
 
 	void SelectCard(IndividualCard myCardS){
+		if (myCardS.cardType == 15) {
+			if (mem_Card [0] != null) {
+				mem_Card [0].UnSelectCard ();
+				DataHandler.s.SendPlayerAction (mem_Card [0].x, mem_Card [0].y, CardHandler.CardActions.UnSelect);
+				mem_Card [0] = null;
+			}
+
+			PowerUpManager.s.ChoosePoisonCard (myCardS);
+			canSelect = false;
+			return;
+		}
+
 		if (mem_Card [0] == null) {
 			mem_Card [0] = myCardS;
 			mem_Card [0].selectedEffect = (GameObject)Instantiate (myEffect, mem_Card [0].transform.position, Quaternion.identity);
@@ -83,7 +98,7 @@ public class LocalPlayerController : MonoBehaviour {
 			mem_Card [1].SelectCard ();
 			DataHandler.s.SendPlayerAction (mem_Card [1].x, mem_Card [1].y, CardHandler.CardActions.Select);
 			canSelect = false;
-			Invoke ("CheckCards", checkSpeed);
+			Invoke ("CheckCards", GS.a.checkSpeedPlayer);
 		}
 	}
 

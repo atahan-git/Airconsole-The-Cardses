@@ -18,44 +18,55 @@ public class CardChecker : MonoBehaviour {
 	public delegate void Callback();
 
 	public void CheckPowerUp (IndividualCard[] cardsToCheck, int cardType, Callback myCallBack){
-		StartCoroutine (CheckCardsCOROT (cardsToCheck, cardType, myCallBack));
+		CheckPowerUp (DataHandler.s.myPlayerIdentifier, cardsToCheck, cardType, myCallBack);
+	}
+
+	public void CheckPowerUp (char playerIdentifier, IndividualCard[] cardsToCheck, int cardType, Callback myCallBack){
+		StartCoroutine (CheckCardsCOROT (playerIdentifier,cardsToCheck, cardType, myCallBack));
 	}
 
 	public void CheckNormal (IndividualCard[] cardsToCheck){
-		DataLogger.s.LogMessage ("Checking match");
-		int scoreType = -1;
-		if (cardsToCheck [0].cardType == cardsToCheck [1].cardType) {
-			DataLogger.s.LogMessage ("Cards Matched");
-			scoreType = cardsToCheck [0].cardType;
-			cardsToCheck [0].MatchCard ();
-			cardsToCheck [1].MatchCard ();
-			DataHandler.s.SendPlayerAction (cardsToCheck [0].x, cardsToCheck [0].y, CardHandler.CardActions.Match);
-			DataHandler.s.SendPlayerAction (cardsToCheck [1].x, cardsToCheck [1].y, CardHandler.CardActions.Match);
-		} else {
-			DataLogger.s.LogMessage ("Cards unselected");
-			cardsToCheck [0].UnSelectCard ();
-			cardsToCheck [1].UnSelectCard ();
-			DataHandler.s.SendPlayerAction (cardsToCheck [0].x, cardsToCheck [0].y, CardHandler.CardActions.UnSelect);
-			DataHandler.s.SendPlayerAction (cardsToCheck [1].x, cardsToCheck [1].y, CardHandler.CardActions.UnSelect);
-		}
+		try {
+			int scoreType = -1;
+			if (cardsToCheck [0].cardType == cardsToCheck [1].cardType) {
+				DataLogger.s.LogMessage ("Cards Matched");
+				scoreType = cardsToCheck [0].cardType;
+				cardsToCheck [0].MatchCard ();
+				cardsToCheck [1].MatchCard ();
+				DataHandler.s.SendPlayerAction (cardsToCheck [0].x, cardsToCheck [0].y, CardHandler.CardActions.Match);
+				DataHandler.s.SendPlayerAction (cardsToCheck [1].x, cardsToCheck [1].y, CardHandler.CardActions.Match);
+			} else {
+				DataLogger.s.LogMessage ("Cards unselected");
+				cardsToCheck [0].UnSelectCard ();
+				cardsToCheck [1].UnSelectCard ();
+				DataHandler.s.SendPlayerAction (cardsToCheck [0].x, cardsToCheck [0].y, CardHandler.CardActions.UnSelect);
+				DataHandler.s.SendPlayerAction (cardsToCheck [1].x, cardsToCheck [1].y, CardHandler.CardActions.UnSelect);
+			}
 
-		if (scoreType != -1) {
-			DataLogger.s.LogMessage ("sending score " + scoreType.ToString());
-			ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, scoreType, 1);
-		}
+			if (scoreType != -1) {
+				DataLogger.s.LogMessage ("sending score " + scoreType.ToString ());
+				ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, scoreType, GS.a.cardScores[scoreType]);
+			}
 
-		DataLogger.s.LogMessage ("Score type is " + scoreType.ToString());
-		//empty our array because no need left
-		EmptyArray(cardsToCheck);
-		DataLogger.s.LogMessage ("array emptied");
+			//empty our array because no need left
+			EmptyArray (cardsToCheck);
+		} catch (System.Exception e) {
+			DataLogger.s.LogMessage (e.StackTrace.ToString (), true);
+		}
 	}
 		
-	IEnumerator CheckCardsCOROT(IndividualCard[] cardsToCheck, int cardType, Callback myCallBack){
+	IEnumerator CheckCardsCOROT(char playerIdentifier, IndividualCard[] cardsToCheck, int cardType, Callback myCallBack){
 
 		//check Cards
 		for (int l = 0; l < cardsToCheck.Length; l++) {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
+
+					//check for poison
+					if (cardsToCheck [l].isPoison) {
+						PowerUpManager.s.ChoosePoisonCard (cardsToCheck [l]);
+					}
+
 
 					for (int k = 1; k < cardsToCheck.Length; k++) {
 						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
@@ -64,20 +75,27 @@ public class CardChecker : MonoBehaviour {
 
 									if (cardsToCheck [k].cardType == cardsToCheck [l].cardType) {
 
-										int myCardType = cardsToCheck [k].cardType;
-										//check if it is dragon
-										if (myCardType < 8)
-											myCardType = cardType;
-										else
-											myCardType = cardType + 7;
+										//Ultimate Poison Alert - player matched two poison cards
+										if (cardsToCheck [k].isPoison) {
+											PowerUpManager.s.ChoosePoisonCard (cardsToCheck [k]);
+											PowerUpManager.s.ChoosePoisonCard (cardsToCheck [l]);
+											ScoreBoardManager.s.AddScore (playerIdentifier, 0, -GS.a.poison_combo);
+										} else {
 
-										cardsToCheck [k].MatchCard ();
-										cardsToCheck [l].MatchCard ();
-										DataHandler.s.SendPlayerAction (cardsToCheck [k].x, cardsToCheck [k].y, CardHandler.CardActions.Match);
-										DataHandler.s.SendPlayerAction (cardsToCheck [l].x, cardsToCheck [l].y, CardHandler.CardActions.Match);
+											int myCardType = cardsToCheck [k].cardType;
+											//check if it is dragon
+											if (myCardType < 8)
+												myCardType = myCardType;
+											else
+												myCardType = cardType + 7;
 
-										ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, myCardType, 1);
+											cardsToCheck [k].MatchCard ();
+											cardsToCheck [l].MatchCard ();
+											DataHandler.s.SendPlayerAction (cardsToCheck [k].x, cardsToCheck [k].y, CardHandler.CardActions.Match);
+											DataHandler.s.SendPlayerAction (cardsToCheck [l].x, cardsToCheck [l].y, CardHandler.CardActions.Match);
 
+											ScoreBoardManager.s.AddScore (playerIdentifier, myCardType, GS.a.cardScores[myCardType]);
+										}
 										yield return new WaitForSeconds (0.1f);
 									}
 								}
@@ -99,10 +117,20 @@ public class CardChecker : MonoBehaviour {
 	}
 
 	public void CheckCards(IndividualCard[] cardsToCheck, int cardType){
+		CheckCards (DataHandler.s.myPlayerIdentifier, cardsToCheck, cardType);
+	}
+
+	public void CheckCards(char playerIdentifier, IndividualCard[] cardsToCheck, int cardType){
 		//check Cards
 		for (int l = 0; l < cardsToCheck.Length; l++) {
 			if (cardsToCheck [l] != null) {
 				if (cardsToCheck [l].cardType != 0) {
+
+					//check for poison
+					if (cardsToCheck [l].isPoison) {
+						PowerUpManager.s.ChoosePoisonCard (cardsToCheck [l]);
+					}
+
 
 					for (int k = 1; k < cardsToCheck.Length; k++) {
 						if (cardsToCheck [k] != null && cardsToCheck [l] != null) {
@@ -111,19 +139,27 @@ public class CardChecker : MonoBehaviour {
 
 									if (cardsToCheck [k].cardType == cardsToCheck [l].cardType) {
 
-										int myCardType = cardsToCheck [k].cardType;
-										//check if it is dragon
-										if (myCardType < 8)
-											myCardType = cardType;
-										else
-											myCardType = cardType + 7;
+										//Ultimate Poison Alert - player matched two poison cards
+										if (cardsToCheck [k].isPoison) {
+											PowerUpManager.s.ChoosePoisonCard (cardsToCheck [k]);
+											PowerUpManager.s.ChoosePoisonCard (cardsToCheck [l]);
+											ScoreBoardManager.s.AddScore (playerIdentifier, 0, -GS.a.poison_combo);
+										} else {
 
-										cardsToCheck [k].MatchCard ();
-										cardsToCheck [l].MatchCard ();
-										DataHandler.s.SendPlayerAction (cardsToCheck [k].x, cardsToCheck [k].y, CardHandler.CardActions.Match);
-										DataHandler.s.SendPlayerAction (cardsToCheck [l].x, cardsToCheck [l].y, CardHandler.CardActions.Match);
+											int myCardType = cardsToCheck [k].cardType;
+											//check if it is dragon
+											if (myCardType < 8)
+												myCardType = cardType;
+											else
+												myCardType = cardType + 7;
 
-										ScoreBoardManager.s.AddScore (DataHandler.s.myPlayerIdentifier, myCardType, 1);
+											cardsToCheck [k].MatchCard ();
+											cardsToCheck [l].MatchCard ();
+											DataHandler.s.SendPlayerAction (cardsToCheck [k].x, cardsToCheck [k].y, CardHandler.CardActions.Match);
+											DataHandler.s.SendPlayerAction (cardsToCheck [l].x, cardsToCheck [l].y, CardHandler.CardActions.Match);
+
+											ScoreBoardManager.s.AddScore (playerIdentifier, myCardType, GS.a.cardScores[myCardType]);
+										}
 									}
 								}
 							}
